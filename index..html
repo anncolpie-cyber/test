@@ -1,0 +1,3010 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microbe Boss Rush｜微生物學第9–12章硬核複習戰</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(20, 28, 54, 0.86);
+      --panel2: rgba(30, 41, 72, 0.92);
+      --text: #eaf0ff;
+      --muted: #9ba8ca;
+      --line: rgba(255,255,255,0.12);
+      --accent: #7c3aed;
+      --accent2: #22d3ee;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --boss: #fb7185;
+      --shadow: 0 20px 60px rgba(0,0,0,0.42);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "PingFang TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(124, 58, 237, 0.36), transparent 28%),
+        radial-gradient(circle at 85% 12%, rgba(34, 211, 238, 0.24), transparent 25%),
+        radial-gradient(circle at 70% 88%, rgba(251, 113, 133, 0.18), transparent 26%),
+        linear-gradient(145deg, #070b16 0%, #0b1020 50%, #111827 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .app {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+      position: relative;
+      z-index: 1;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 12px 30px rgba(34, 211, 238, .22);
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+    }
+    .brand h1 {
+      font-size: clamp(22px, 3vw, 34px);
+      margin: 0;
+      letter-spacing: .4px;
+      line-height: 1.05;
+    }
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .screen {
+      display: none;
+      animation: fadeUp .36s ease both;
+    }
+    .screen.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.12fr .88fr;
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+    .card-inner {
+      padding: clamp(18px, 3vw, 28px);
+    }
+    .hero h2 {
+      font-size: clamp(30px, 5vw, 56px);
+      line-height: 1.05;
+      margin: 0 0 12px;
+    }
+    .hero h2 span {
+      background: linear-gradient(90deg, #fff, #bcd2ff 30%, #67e8f9 70%, #c4b5fd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero p {
+      color: #c7d2fe;
+      font-size: 17px;
+      line-height: 1.75;
+      margin: 0 0 20px;
+    }
+    .mode-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .mode-btn, button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+      border-radius: 18px;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease, opacity .15s ease;
+    }
+    .mode-btn {
+      text-align: left;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: grid;
+      gap: 4px;
+    }
+    .mode-btn:hover, .option:hover, .small-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(34, 211, 238, .55);
+      background: rgba(34, 211, 238, .09);
+    }
+    .mode-btn strong {
+      font-size: 18px;
+    }
+    .mode-btn span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .chapter-grid button {
+      padding: 14px 12px;
+      background: rgba(124,58,237,.15);
+      border: 1px solid rgba(196,181,253,.18);
+      text-align: left;
+      min-height: 72px;
+    }
+    .chapter-grid b { display: block; margin-bottom: 4px; }
+    .chapter-grid small { color: var(--muted); line-height: 1.35; }
+    .side h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+    .rule {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      color: #d7def7;
+      line-height: 1.45;
+    }
+    .rule:last-child { border-bottom: 0; }
+    .rule .num {
+      width: 28px; height: 28px; border-radius: 10px;
+      background: rgba(34,211,238,.14);
+      display: grid; place-items: center;
+      color: #67e8f9;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .stat {
+      padding: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+    .stat small {
+      display:block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .stat b {
+      font-size: 20px;
+    }
+    .bars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .bar-box {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+    .fill.hp { background: linear-gradient(90deg, var(--good), #a3e635); }
+    .fill.boss { background: linear-gradient(90deg, var(--boss), var(--warn)); }
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: #d7def7;
+    }
+    .badge.hard { color: #fbbf24; border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.09); }
+    .badge.boss { color: #fb7185; border-color: rgba(251,113,133,.4); background: rgba(251,113,133,.1); }
+    .question h2 {
+      margin: 0 0 16px;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.45;
+    }
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      background: rgba(255,255,255,.065);
+      border: 1px solid rgba(255,255,255,.12);
+      line-height: 1.55;
+      font-size: 16px;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .option .letter {
+      width: 30px; height: 30px; border-radius: 11px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.09);
+      font-weight: 800;
+      color: #c4b5fd;
+    }
+    .option.correct {
+      background: rgba(34,197,94,.13);
+      border-color: rgba(34,197,94,.75);
+    }
+    .option.wrong {
+      background: rgba(239,68,68,.13);
+      border-color: rgba(239,68,68,.72);
+    }
+    .option.disabled {
+      pointer-events: none;
+      opacity: .8;
+    }
+    .feedback {
+      display: none;
+      margin-top: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      padding: 18px;
+    }
+    .feedback.show { display: block; animation: pop .24s ease both; }
+    @keyframes pop {
+      from { transform: scale(.985); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .feedback h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    .feedback p {
+      color: #d8e1ff;
+      line-height: 1.7;
+      margin: 8px 0;
+    }
+    .hint-box {
+      display:none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(34,211,238,.45);
+      background: rgba(34,211,238,.08);
+      color: #cffafe;
+      line-height: 1.6;
+    }
+    .hint-box.show { display: block; }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .primary {
+      padding: 12px 18px;
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      box-shadow: 0 12px 30px rgba(124,58,237,.22);
+      font-weight: 800;
+    }
+    .danger {
+      padding: 12px 18px;
+      background: rgba(239,68,68,.14);
+      border: 1px solid rgba(239,68,68,.45);
+    }
+    .small-btn {
+      padding: 12px 14px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--line);
+    }
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: .75fr 1.25fr;
+      gap: 18px;
+    }
+    .rank {
+      font-size: 88px;
+      line-height: 1;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff, #67e8f9, #c4b5fd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 8px 0;
+    }
+    .summary-list {
+      display: grid;
+      gap: 10px;
+    }
+    .summary-item {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      line-height: 1.55;
+    }
+    .weak {
+      color: #fca5a5;
+      font-weight: 800;
+    }
+    .review-list {
+      display: grid;
+      gap: 12px;
+      max-height: 520px;
+      overflow: auto;
+      padding-right: 5px;
+    }
+    .review-item {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      line-height: 1.55;
+    }
+    .review-item b { color: #93c5fd; }
+    .shake {
+      animation: shake .35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .flash {
+      animation: flash .35s ease;
+    }
+    @keyframes flash {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.45); }
+      100% { filter: brightness(1); }
+    }
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .grid, .result-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .bars { grid-template-columns: 1fr; }
+      .chapter-grid { grid-template-columns: 1fr; }
+      header { align-items: flex-start; flex-direction: column; }
+      .pill { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="app" id="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🧫</div>
+      <div>
+        <h1>Microbe Boss Rush</h1>
+        <p>微生物學第 9–12 章硬核複習戰｜答錯會反擊，答對會爆擊</p>
+      </div>
+    </div>
+    <div class="pill" id="bankInfo">題庫載入中...</div>
+  </header>
+
+  <section id="home" class="screen active">
+    <div class="grid">
+      <div class="card hero">
+        <div class="card-inner">
+          <h2><span>打怪式複習</span><br>不是普通選擇題</h2>
+          <p>
+            這份遊戲把第 9–12 章做成硬核題庫：DNA、基因工程、滅菌控制、抗微生物藥物會混在一起考。
+            每題答完都有白話講解、扣血、Boss 血條、Combo、錯題回顧與章節弱點統計。
+          </p>
+          <div class="mode-list">
+            <button class="mode-btn" onclick="startMode('bossrush')">
+              <strong>🔥 Boss Rush｜40 題混合戰</strong>
+              <span>隨機抽中高難度題，適合上課後快速測驗。會自動計分與統計弱點章節。</span>
+            </button>
+            <button class="mode-btn" onclick="startMode('hell')">
+              <strong>💀 Final Exam Hell｜60 題硬核期末戰</strong>
+              <span>題目偏硬，Boss 整合題比例提高。HP 歸零會直接結算。</span>
+            </button>
+            <button class="mode-btn" onclick="startMode('all')">
+              <strong>📚 全題庫練習｜120 題</strong>
+              <span>完整刷完四章與整合 Boss 題，適合考前總複習。</span>
+            </button>
+            <button class="mode-btn" onclick="startWrongReview()">
+              <strong>🩹 錯題回顧｜只練你錯過的題</strong>
+              <span>會從本機瀏覽器記錄的錯題重新出題。換裝置或清除瀏覽器資料會消失。</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card side">
+        <div class="card-inner">
+          <h3>章節單挑</h3>
+          <div class="chapter-grid">
+            <button onclick="startChapter('第9章｜Genetics & Microbial Genetics')"><b>第 9 章</b><small>DNA、central dogma、operon、mutation、gene transfer</small></button>
+            <button onclick="startChapter('第10章｜Genetic Engineering')"><b>第 10 章</b><small>PCR、cloning、vector、screening、sequencing、GMO</small></button>
+            <button onclick="startChapter('第11章｜Microbial Control')"><b>第 11 章</b><small>sanitization、disinfection、sterilization、filtration</small></button>
+            <button onclick="startChapter('第12章｜Antimicrobial Drugs')"><b>第 12 章</b><small>selective toxicity、drug targets、resistance、MIC/TI</small></button>
+          </div>
+
+          <h3 style="margin-top:24px;">遊戲規則</h3>
+          <div class="rule"><div class="num">1</div><div>答對會打 Boss、加 XP、累積 Combo。連對 3 題會暴擊。</div></div>
+          <div class="rule"><div class="num">2</div><div>答錯會扣 HP，並顯示「你錯在哪個觀念」。錯題會自動存進錯題回顧。</div></div>
+          <div class="rule"><div class="num">3</div><div>提示每局 3 次。使用提示會扣 2 XP，但不扣血。</div></div>
+          <div class="rule"><div class="num">4</div><div>Final Exam Hell 中 HP 歸零就提前結算，適合模擬壓力測驗。</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">建議學生先章節單挑，再打 Boss Rush，最後挑戰 Final Exam Hell。</div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="topbar">
+      <div class="stats">
+        <div class="stat"><small>模式</small><b id="modeName">Boss</b></div>
+        <div class="stat"><small>進度</small><b id="progressText">1/40</b></div>
+        <div class="stat"><small>XP</small><b id="xpText">0</b></div>
+        <div class="stat"><small>Combo</small><b id="comboText">0</b></div>
+        <div class="stat"><small>正確率</small><b id="accText">0%</b></div>
+      </div>
+      <div class="bars">
+        <div class="bar-box">
+          <div class="bar-label"><span>玩家 HP</span><span id="hpLabel">100/100</span></div>
+          <div class="bar"><div class="fill hp" id="hpFill"></div></div>
+        </div>
+        <div class="bar-box">
+          <div class="bar-label"><span>Boss HP</span><span id="bossLabel">100%</span></div>
+          <div class="bar"><div class="fill boss" id="bossFill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card question" id="questionCard">
+      <div class="card-inner">
+        <div class="question-meta">
+          <span class="badge" id="chapterBadge">章節</span>
+          <span class="badge" id="difficultyBadge">Hard</span>
+          <span class="badge" id="conceptBadge">Concept</span>
+        </div>
+        <h2 id="questionText">Question</h2>
+        <div class="options" id="options"></div>
+        <div class="hint-box" id="hintBox"></div>
+        <div class="feedback" id="feedbackBox">
+          <h3 id="feedbackTitle"></h3>
+          <p id="feedbackFlavor"></p>
+          <p id="feedbackExplanation"></p>
+        </div>
+        <div class="actions">
+          <button class="small-btn" id="hintBtn" onclick="showHint()">💡 提示 <span id="hintCount">3</span></button>
+          <button class="primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">下一題 →</button>
+          <button class="small-btn" onclick="confirmQuit()">回首頁</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen">
+    <div class="result-grid">
+      <div class="card">
+        <div class="card-inner">
+          <h2 style="margin:0;">戰鬥結算</h2>
+          <div class="rank" id="rankText">A</div>
+          <div class="summary-list">
+            <div class="summary-item">XP：<b id="finalXp">0</b></div>
+            <div class="summary-item">正確率：<b id="finalAcc">0%</b></div>
+            <div class="summary-item">剩餘 HP：<b id="finalHp">0</b></div>
+            <div class="summary-item">最高 Combo：<b id="finalMaxCombo">0</b></div>
+            <div class="summary-item">最弱章節：<b class="weak" id="weakChapter">無</b></div>
+          </div>
+          <div class="actions">
+            <button class="primary" onclick="restartSame()">再打一場</button>
+            <button class="small-btn" onclick="goHome()">回首頁</button>
+            <button class="small-btn" onclick="startWrongReview()">練錯題</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-inner">
+          <h2 style="margin-top:0;">錯題與講解</h2>
+          <div id="resultAdvice" class="summary-item" style="margin-bottom:12px;"></div>
+          <div class="review-list" id="wrongList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "id": "9-01",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Replication origin 常常是 AT-rich。若考題問「為什麼這個區域適合作為 DNA 複製起點」，下列哪個說法最精準？",
+    "options": [
+      "因為 A–T 有 3 個氫鍵，比 G–C 更穩定",
+      "因為 A–T 只有 2 個氫鍵，雙股較容易被 helicase 打開",
+      "因為 AT-rich 區域不能被 DNA polymerase 辨識",
+      "因為 G–C 沒有氫鍵，所以不能形成 helix"
+    ],
+    "answer": 1,
+    "explanation": "AT-rich 區域較容易打開，因為 A–T 配對只有 2 個 hydrogen bonds；G–C 有 3 個，較穩定。複製起點需要先 unzip，所以常見 AT-rich。",
+    "correctFeedback": "✅ DNA 拉鍊被你精準打開！你抓到 origin 常 AT-rich 的真正原因。",
+    "wrongFeedback": "❌ 你把穩定性搞反了。複製起點要容易打開，不是越穩越好。",
+    "concept": "AT-rich / replication origin"
+  },
+  {
+    "id": "9-02",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "下列哪個 DNA replication 的流程順序最合理？",
+    "options": [
+      "Ligase → helicase → primase → DNA pol III → DNA pol I",
+      "Helicase → primase → DNA pol III → DNA pol I → ligase",
+      "DNA pol I → primase → ligase → helicase → DNA pol III",
+      "Primase → ligase → DNA pol III → helicase → DNA pol I"
+    ],
+    "answer": 1,
+    "explanation": "先由 helicase 打開雙股，primase 放 RNA primer，DNA pol III 延長，DNA pol I 移除 primer 並補 DNA，最後 ligase 封住 nick。",
+    "correctFeedback": "✅ 複製機器順利啟動！流程觀念很穩。",
+    "wrongFeedback": "❌ 複製工地亂掉了。記成：打開 → 放起點 → 延長 → 補洞 → 黏起來。",
+    "concept": "DNA replication enzymes"
+  },
+  {
+    "id": "9-03",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "如果 lagging strand 上 Okazaki fragments 已經形成，但片段之間一直無法連成完整一條 DNA，最可能是哪個酵素功能出問題？",
+    "options": [
+      "Helicase",
+      "Primase",
+      "DNA ligase",
+      "RNA polymerase"
+    ],
+    "answer": 2,
+    "explanation": "Ligase 的工作是把 DNA 片段之間的 nick 接起來。DNA pol III 負責延長，DNA pol I 負責移除 RNA primer 並補 DNA。",
+    "correctFeedback": "✅ Okazaki 片段成功接合！你知道 ligase 是 DNA 膠水。",
+    "wrongFeedback": "❌ 片段還是斷的。你要找的是負責封口的 ligase，不是負責打開或延長的酵素。",
+    "concept": "Okazaki fragments / ligase"
+  },
+  {
+    "id": "9-04",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Leading strand 和 lagging strand 會出現差異，最根本的原因是什麼？",
+    "options": [
+      "DNA polymerase 只能 5′→3′ 合成，而 DNA 兩股 antiparallel",
+      "RNA polymerase 只能讀 protein",
+      "DNA ligase 只能作用在 leading strand",
+      "A–T 和 G–C 配對方向完全相同"
+    ],
+    "answer": 0,
+    "explanation": "DNA polymerase 只能把 nucleotide 加到 3′-OH，所以新股只能 5′→3′ 合成。因為 DNA 兩股方向相反，一邊能連續，一邊只能分段合成。",
+    "correctFeedback": "✅ 你沒有死背 leading/lagging，而是抓到 5′→3′ 的根源。",
+    "wrongFeedback": "❌ 這題不是問哪一邊比較快，而是問為什麼會分成連續與不連續。",
+    "concept": "5′→3′ synthesis"
+  },
+  {
+    "id": "9-05",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "若 DNA polymerase III 正常，但 primase 無法作用，最直接的後果是什麼？",
+    "options": [
+      "DNA polymerase III 缺少 primer 起點，難以開始合成",
+      "DNA 已合成但無法封住 nick",
+      "RNA polymerase 會直接合成蛋白質",
+      "DNA 會自動轉變成 mRNA"
+    ],
+    "answer": 0,
+    "explanation": "DNA polymerase 不能從零開始，需要 RNA primer 提供 3′-OH。primase 失效會讓複製起始受阻。",
+    "correctFeedback": "✅ 起始點判斷正確！DNA pol 不是憑空開工。",
+    "wrongFeedback": "❌ DNA polymerase 不是萬能，它需要 primer 才能開始。",
+    "concept": "Primase / primer"
+  },
+  {
+    "id": "9-06",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "某 DNA template strand 序列為 3′-TAC GGA ATT-5′。轉錄出的 mRNA 最合理是？",
+    "options": [
+      "5′-AUG CCU UAA-3′",
+      "5′-TAC GGA ATT-3′",
+      "3′-AUG CCU UAA-5′",
+      "5′-ATG CCT TAA-3′"
+    ],
+    "answer": 0,
+    "explanation": "RNA 依照 template strand 互補合成，方向是 5′→3′；T 對 A、A 對 U、C 對 G、G 對 C。所以 3′-TAC GGA ATT-5′ 會形成 5′-AUG CCU UAA-3′。",
+    "correctFeedback": "✅ 轉錄成功！你同時處理了方向與 U 取代 T。",
+    "wrongFeedback": "❌ 你可能把 coding strand 和 template strand 混了，或忘記 RNA 用 U 不用 T。",
+    "concept": "Template strand / transcription"
+  },
+  {
+    "id": "9-07",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Coding strand 和 mRNA 的關係，下列哪個敘述最精準？",
+    "options": [
+      "coding strand 是 RNA polymerase 實際讀取的股",
+      "mRNA 與 coding strand 序列相似，但 RNA 用 U 取代 T",
+      "mRNA 與 coding strand 完全互補",
+      "coding strand 只能在 translation 才出現"
+    ],
+    "answer": 1,
+    "explanation": "RNA polymerase 讀的是 template strand。coding strand 的序列和 mRNA 類似，只差 DNA 用 T、RNA 用 U。",
+    "correctFeedback": "✅ 你分清 template 與 coding，不會被題目騙。",
+    "wrongFeedback": "❌ 常見陷阱：被讀的是 template strand，不是 coding strand。",
+    "concept": "Coding strand vs template strand"
+  },
+  {
+    "id": "9-08",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Normal",
+    "prompt": "mRNA、tRNA、rRNA 的角色若用工廠比喻，哪個配對最合理？",
+    "options": [
+      "mRNA = 工廠本體；tRNA = 訂單；rRNA = DNA 剪刀",
+      "mRNA = 訂單；tRNA = 送貨員；rRNA = ribosome 工廠本體",
+      "mRNA = 蛋白質；tRNA = DNA；rRNA = plasmid",
+      "mRNA = 出口；tRNA = operator；rRNA = repressor"
+    ],
+    "answer": 1,
+    "explanation": "mRNA 帶訊息，tRNA 帶 amino acid 並用 anticodon 配對，rRNA 組成 ribosome 並參與蛋白合成。",
+    "correctFeedback": "✅ 蛋白質工廠運作正常！三種 RNA 分工清楚。",
+    "wrongFeedback": "❌ 你把 RNA 角色混在一起了：mRNA 帶訊息，tRNA 送胺基酸，rRNA 是核糖體核心。",
+    "concept": "mRNA / tRNA / rRNA"
+  },
+  {
+    "id": "9-09",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Translation initiation 時，第一個帶 methionine 的 tRNA 通常進入 ribosome 的哪個位置？",
+    "options": [
+      "A site",
+      "P site",
+      "E site",
+      "Operator"
+    ],
+    "answer": 1,
+    "explanation": "轉譯起始時，第一個 tRNA 進入 P site。後續新的 tRNA 才進 A site，空 tRNA 從 E site 離開。",
+    "correctFeedback": "✅ 起始位置命中！A 進貨、P 加工，但第一個 tRNA 先在 P site。",
+    "wrongFeedback": "❌ 很多人會直覺選 A site，但 initiation 的第一個 tRNA 是進 P site。",
+    "concept": "Translation initiation / P site"
+  },
+  {
+    "id": "9-10",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Normal",
+    "prompt": "Ribosome 的 A、P、E site 功能，哪個記法最合理？",
+    "options": [
+      "A = 出口；P = 進貨；E = 加工",
+      "A = 新 tRNA 進入；P = peptide chain 加工；E = 空 tRNA 離開",
+      "A = DNA 複製；P = primer 製造；E = ligase 接合",
+      "A = allolactose；P = promoter；E = exon"
+    ],
+    "answer": 1,
+    "explanation": "A site 接收新的 aminoacyl-tRNA；P site 持有正在延長的 peptide chain；E site 讓空 tRNA exit。",
+    "correctFeedback": "✅ 生產線運轉順暢！A 進貨、P 加工、E 出口。",
+    "wrongFeedback": "❌ A/P/E 是 translation 的 ribosome 位置，不是 replication 或 operon 名詞。",
+    "concept": "A/P/E site"
+  },
+  {
+    "id": "9-11",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Stop codon 出現時，最合理的描述是什麼？",
+    "options": [
+      "Stop codon 由特殊 tRNA 攜帶 stop amino acid",
+      "Release factor 進入，polypeptide 被釋放",
+      "Ribosome 回到 DNA 上開始 replication",
+      "mRNA 被 ligase 接回 DNA"
+    ],
+    "answer": 1,
+    "explanation": "Stop codon 沒有對應的 tRNA。release factor 會進入 ribosome，使 polypeptide 釋放並結束 translation。",
+    "correctFeedback": "✅ 轉譯安全停機！stop codon 不是胺基酸，是停工訊號。",
+    "wrongFeedback": "❌ Stop codon 不是叫 tRNA 送貨，而是叫整台 ribosome 停止。",
+    "concept": "Stop codon / release factor"
+  },
+  {
+    "id": "9-12",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "下列哪個最能區分 prokaryote 與 eukaryote 的 gene expression？",
+    "options": [
+      "細菌通常可邊 transcription 邊 translation；真核通常轉錄在 nucleus、轉譯在 cytoplasm",
+      "細菌完全沒有 mRNA；真核完全沒有 ribosome",
+      "真核一定沒有 intron；細菌一定需要 splicing",
+      "細菌所有 mRNA 都有 5′ cap 和 poly-A tail"
+    ],
+    "answer": 0,
+    "explanation": "原核細胞沒有細胞核，transcription 與 translation 可同時發生。真核轉錄在 nucleus，mRNA processing 後才到 cytoplasm 轉譯。",
+    "correctFeedback": "✅ 細菌邊抄邊翻，真核先加工再翻譯，你抓到差異。",
+    "wrongFeedback": "❌ 你把真核與原核的加工流程搞反了。",
+    "concept": "Prokaryote vs eukaryote"
+  },
+  {
+    "id": "9-13",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Lac operon 在沒有 lactose 的情況下，最合理狀態是？",
+    "options": [
+      "Repressor 綁 operator，lacZYA transcription OFF",
+      "Allolactose 綁 repressor，使 operon 最強表現",
+      "CAP-cAMP 完全取代 RNA polymerase 轉錄",
+      "lacY 先被翻譯，再決定 promoter 是否存在"
+    ],
+    "answer": 0,
+    "explanation": "沒有 lactose 時，repressor 會綁在 operator，阻擋 RNA polymerase 轉錄 lacZYA。",
+    "correctFeedback": "✅ 乳糖工廠成功省電！沒有 lactose，就不浪費能量開工。",
+    "wrongFeedback": "❌ 沒 lactose 時不是 ON，而是 repressor 擋住 operator。",
+    "concept": "Lac operon OFF"
+  },
+  {
+    "id": "9-14",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Boss",
+    "prompt": "Lac operon 表現最強通常需要哪個條件組合？",
+    "options": [
+      "有 lactose、有 glucose",
+      "沒有 lactose、沒有 glucose",
+      "有 lactose、glucose 低，使 CAP-cAMP 協助 RNA polymerase",
+      "沒有 lactose、glucose 高，使 repressor 離開 operator"
+    ],
+    "answer": 2,
+    "explanation": "有 lactose 時 allolactose 使 repressor 離開；glucose 低時 cAMP 高，CAP-cAMP 可幫助 RNA polymerase，因此表現最強。",
+    "correctFeedback": "🔥 Lac operon 爆發輸出！你同時考慮了 repressor 和 glucose effect。",
+    "wrongFeedback": "❌ 只記得 lactose 不夠。最強表現還要 glucose 低、cAMP 高、CAP 幫忙。",
+    "concept": "Lac operon / glucose effect"
+  },
+  {
+    "id": "9-15",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Inducible operon 和 repressible operon 的差異，下列哪個最正確？",
+    "options": [
+      "Inducible 通常平常 OFF，有 substrate/inducer 才 ON；repressible 通常平常 ON，產物太多才 OFF",
+      "Inducible 永遠 ON；repressible 永遠 OFF",
+      "兩者都只能出現在真核細胞",
+      "lac operon 是 repressible，arginine operon 是 inducible"
+    ],
+    "answer": 0,
+    "explanation": "lac operon 屬誘導型，平常 OFF，有 lactose 才開；arginine operon 屬抑制型，平常 ON，產物太多才關。",
+    "correctFeedback": "✅ 開關邏輯清楚！有食物才開工，做太多就關。",
+    "wrongFeedback": "❌ 你把 lac 和 arginine 的調控方向顛倒了。",
+    "concept": "Inducible vs repressible operon"
+  },
+  {
+    "id": "9-16",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "一個 codon 改變後 amino acid 不變，最適合稱為？",
+    "options": [
+      "Missense mutation",
+      "Nonsense mutation",
+      "Silent mutation",
+      "Frameshift mutation"
+    ],
+    "answer": 2,
+    "explanation": "Silent mutation 是 codon 改變，但 amino acid 不變，通常對 protein 影響小。",
+    "correctFeedback": "✅ 低噪音突變！序列變了，但蛋白質可能沒變。",
+    "wrongFeedback": "❌ Missense 是胺基酸改變；nonsense 是變 stop；frameshift 是讀框移位。",
+    "concept": "Point mutation types"
+  },
+  {
+    "id": "9-17",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Boss",
+    "prompt": "一段 ORF 前段發生 single-base deletion。下列哪個後果最可能？",
+    "options": [
+      "通常只改變一個 amino acid，後面完全不變",
+      "可能造成 frameshift，使後面 codon 分組整個改變",
+      "一定是 silent mutation",
+      "只影響 DNA packaging，不影響 protein"
+    ],
+    "answer": 1,
+    "explanation": "插入或刪除不是 3 的倍數時，reading frame 會移位，後面 codons 可能幾乎全部改變，常出現提早 stop。",
+    "correctFeedback": "🔥 DNA 情報錯亂被你抓出來了！single-base deletion 很可能 frameshift。",
+    "wrongFeedback": "❌ 你把 missense 和 frameshift 混了。少一個 base 會讓後面三個一組的讀法全亂。",
+    "concept": "Frameshift"
+  },
+  {
+    "id": "9-18",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Back mutation 與 suppressor mutation 的差異，哪個敘述最精準？",
+    "options": [
+      "Back mutation 是第二個突變補償；suppressor 是完全回到原序列",
+      "Back mutation 是改回原序列；suppressor 是用另一個突變補償 phenotype",
+      "兩者都一定讓 DNA 無法複製",
+      "兩者只會發生在 protein，不會發生在 DNA"
+    ],
+    "answer": 1,
+    "explanation": "Back mutation/reversion 是序列改回原本；suppressor mutation 不一定回到原序列，但第二個改變可能補償第一個突變的效果。",
+    "correctFeedback": "✅ 修復邏輯清楚！你分清「改回去」和「繞路救回功能」。",
+    "wrongFeedback": "❌ 這題重點是：back = 回原序列；suppressor = 第二個突變補償效果。",
+    "concept": "Back mutation / suppressor"
+  },
+  {
+    "id": "9-19",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "DNA 複製時發生錯配。如果 proofreading 和 mismatch repair 都沒修好，什麼時候最可能變成穩定 mutation？",
+    "options": [
+      "錯誤永遠不會傳下去",
+      "下一輪複製後，錯誤配對可能固定成兩股都一致的突變序列",
+      "只要 transcription 發生就會立刻修復",
+      "protein folding 後會自動把 DNA 改回來"
+    ],
+    "answer": 1,
+    "explanation": "錯配若未被修復，下一輪 DNA replication 可能把錯誤當模板，形成穩定突變。",
+    "correctFeedback": "✅ 你抓到 mutation 固定化的概念：錯誤留下來才會傳。",
+    "wrongFeedback": "❌ DNA repair 失敗後，下一次複製可能把錯誤固定，不是 protein 會自動修 DNA。",
+    "concept": "DNA repair / mutation fixation"
+  },
+  {
+    "id": "9-20",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Rifamycin 主要抑制 RNA polymerase。若用中心法則來看，它最直接卡住哪一步？",
+    "options": [
+      "DNA → DNA replication",
+      "DNA → RNA transcription",
+      "RNA → protein translation",
+      "Protein → phenotype folding"
+    ],
+    "answer": 1,
+    "explanation": "RNA polymerase 負責 transcription，因此 rifamycin 最直接阻止 DNA 轉錄成 RNA。",
+    "correctFeedback": "✅ 中心法則攻擊點命中！RNA polymerase = transcription。",
+    "wrongFeedback": "❌ 你把 polymerase 種類混了。DNA polymerase 管 DNA 複製；RNA polymerase 管轉錄。",
+    "concept": "Antibiotic target / transcription"
+  },
+  {
+    "id": "9-21",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Transposon 為什麼可能造成 gene function 改變？",
+    "options": [
+      "它是會移動的 DNA，插入 gene 或調控區可能破壞或改變表現",
+      "它是細菌的 ribosome 小次單元",
+      "它只能讓 DNA 永遠不突變",
+      "它只存在於病毒 capsid 外殼"
+    ],
+    "answer": 0,
+    "explanation": "Transposon 是可移動 DNA。若跳入基因內或 promoter/operator 等調控區，可能破壞 gene 或改變表現，也可能攜帶抗藥基因。",
+    "correctFeedback": "✅ 會跳的 DNA 被你抓到了！位置改變就可能改功能。",
+    "wrongFeedback": "❌ Transposon 不是蛋白質機器，它是一段可移動的 DNA。",
+    "concept": "Transposon"
+  },
+  {
+    "id": "9-22",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "下列哪個最符合 conjugation？",
+    "options": [
+      "細菌從環境撿 naked DNA",
+      "Bacteriophage 包錯細菌 DNA",
+      "兩個活細菌接觸，透過 pilus/bridge 傳 plasmid",
+      "RNA polymerase 讀 promoter"
+    ],
+    "answer": 2,
+    "explanation": "Conjugation 需要細菌接觸，常透過 sex pilus/bridge 傳 plasmid，例如 R plasmid。",
+    "correctFeedback": "✅ 接觸傳送成功！sex pilus = conjugation 秒殺線索。",
+    "wrongFeedback": "❌ 撿 DNA 是 transformation；病毒帶 DNA 是 transduction。",
+    "concept": "Conjugation"
+  },
+  {
+    "id": "9-23",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Hard",
+    "prompt": "Griffith transformation 經典概念最接近下列哪個描述？",
+    "options": [
+      "R strain 從環境取得 S strain 的 capsule gene，性狀改變",
+      "兩株細菌用 sex pilus 傳遞 ribosome",
+      "Phage 只帶走 viral capsid，不帶 DNA",
+      "RNA primer 轉變成 protein"
+    ],
+    "answer": 0,
+    "explanation": "Transformation 是 competent bacteria 吸收環境中的 naked DNA。若 R strain 取得 capsule gene，可能變成有毒性 phenotype。",
+    "correctFeedback": "✅ 細菌撿到新能力！Transformation = naked DNA uptake。",
+    "wrongFeedback": "❌ 這題不是 conjugation，也不是 transduction；關鍵字是從環境取得裸 DNA。",
+    "concept": "Transformation"
+  },
+  {
+    "id": "9-24",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Boss",
+    "prompt": "Generalized transduction 和 specialized transduction 的差異，哪個最精準？",
+    "options": [
+      "Generalized 通常可帶任意 bacterial DNA；specialized 通常帶 phage 插入位置附近的特定基因",
+      "Generalized 一定需要 sex pilus；specialized 一定是 naked DNA",
+      "Generalized 只發生在真核；specialized 只發生在植物",
+      "兩者都是 RNA polymerase 專用機制"
+    ],
+    "answer": 0,
+    "explanation": "Generalized transduction 是 phage 裝錯，可能帶任意 bacterial DNA；specialized transduction 是溫和型 phage 離開染色體時帶走鄰近特定基因。",
+    "correctFeedback": "🔥 病毒快遞分類成功！random vs specific 是這題核心。",
+    "wrongFeedback": "❌ Sex pilus 是 conjugation；naked DNA 是 transformation。Transduction 是 phage 帶 DNA。",
+    "concept": "Transduction"
+  },
+  {
+    "id": "9-25",
+    "chapter": "第9章｜Genetics & Microbial Genetics",
+    "difficulty": "Boss",
+    "prompt": "某細菌透過 sex pilus 得到 R plasmid，之後對多種抗生素有抗性。下列整合判斷最合理？",
+    "options": [
+      "這是 transformation，因為 R plasmid 一定來自裸 DNA",
+      "這是 conjugation，R plasmid 可帶抗藥基因並在族群中擴散",
+      "這是 transcription，因為 sex pilus 是 RNA polymerase",
+      "這是 translation，因為 plasmid 是 tRNA 的一種"
+    ],
+    "answer": 1,
+    "explanation": "sex pilus/細胞接觸是 conjugation 的線索。R plasmid 可攜帶 antibiotic resistance genes，使抗藥性在細菌族群中擴散。",
+    "correctFeedback": "🔥 抗藥基因傳播路線被你破案！sex pilus + R plasmid = conjugation。",
+    "wrongFeedback": "❌ 你把 gene transfer 和中心法則混在一起了。sex pilus 是細菌接觸傳 plasmid。",
+    "concept": "R plasmid / conjugation"
+  },
+  {
+    "id": "10-01",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "PCR 和 probe hybridization 都利用 DNA 的哪個核心特性？",
+    "options": [
+      "胺基酸可形成 peptide bond",
+      "互補鹼基配對：DNA 可 denature 後再 anneal",
+      "β-lactam ring 可被切開",
+      "endospore 可耐高溫"
+    ],
+    "answer": 1,
+    "explanation": "PCR 需要 denaturation 打開 DNA，annealing 讓 primer 配對；probe hybridization 也靠互補序列配對找到目標。",
+    "correctFeedback": "✅ DNA 拉鍊邏輯掌握！PCR 與 probe 都靠互補配對。",
+    "wrongFeedback": "❌ 這題不是蛋白質或抗生素，是 DNA 雙股打開與重新配對。",
+    "concept": "Denaturation / annealing"
+  },
+  {
+    "id": "10-02",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Normal",
+    "prompt": "Restriction enzyme 和 DNA ligase 在 recombinant DNA construction 中的角色分別是？",
+    "options": [
+      "剪 DNA；接 DNA",
+      "接 DNA；讀 DNA 序列",
+      "放大 DNA；染 DNA band",
+      "抑制 ribosome；阻止 folate"
+    ],
+    "answer": 0,
+    "explanation": "Restriction enzyme 認特定序列並切 DNA；DNA ligase 接回 phosphodiester bond，把 DNA 片段黏起來。",
+    "correctFeedback": "✅ 剪刀與膠水分清楚！",
+    "wrongFeedback": "❌ 基因工程剪貼簿：restriction enzyme 是剪刀，ligase 是膠水。",
+    "concept": "Restriction enzyme / ligase"
+  },
+  {
+    "id": "10-03",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "一個 plasmid vector 若沒有 origin of replication，最直接的問題是什麼？",
+    "options": [
+      "無法在 host 內複製維持",
+      "無法被 restriction enzyme 切開",
+      "一定會變成 virus",
+      "一定可以表現人類所有 protein"
+    ],
+    "answer": 0,
+    "explanation": "ori 是複製起點；沒有 ori，plasmid 無法在宿主細胞內複製並維持。",
+    "correctFeedback": "✅ 載體活下去的核心被你抓到：ori = 能複製。",
+    "wrongFeedback": "❌ Marker 是篩選；ori 才是讓 plasmid 在細胞內複製的關鍵。",
+    "concept": "Vector / ori"
+  },
+  {
+    "id": "10-04",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Selection marker 在 cloning 中主要解決什麼問題？",
+    "options": [
+      "讓研究者知道哪些 cell 可能拿到 vector",
+      "直接保證 insert 方向正確",
+      "讓 DNA polymerase 不需要 primer",
+      "把 RNA 變成 protein"
+    ],
+    "answer": 0,
+    "explanation": "Selection marker 常是抗生素抗性，可幫助篩選可能帶有 plasmid 的細胞，但不能保證 insert 正確。",
+    "correctFeedback": "✅ 篩選邏輯正確！marker 是找可能成功的細胞，不是保證 clone 完美。",
+    "wrongFeedback": "❌ 抗生素 marker 只能幫你留下可能有 vector 的細胞，不能證明 insert 正確。",
+    "concept": "Selection marker"
+  },
+  {
+    "id": "10-05",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "如果目標只是快速複製大量 DNA plasmid，最常用且方便的 cloning host 是？",
+    "options": [
+      "E. coli",
+      "成熟紅血球",
+      "裸病毒 capsid",
+      "人類骨骼肌整個組織"
+    ],
+    "answer": 0,
+    "explanation": "E. coli 生長快、容易培養、容易轉形，是常見 cloning host。若要複雜真核蛋白表現，才可能考慮 yeast 或 animal cells。",
+    "correctFeedback": "✅ 工廠選對！複製 DNA 首選 E. coli 很合理。",
+    "wrongFeedback": "❌ Host 要能培養、接受 plasmid、穩定複製；成熟紅血球不是好選項。",
+    "concept": "Cloning host"
+  },
+  {
+    "id": "10-06",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Recombinant plasmid construction 的流程，哪個最合理？",
+    "options": [
+      "選基因 → 切 vector/insert → ligase 接合 → transformation → screening",
+      "screening → translation → autoclave → ORF → disinfection",
+      "先做 microarray → 直接得到 plasmid → 不需 host",
+      "先加抗生素 → DNA 自動插入 chromosome"
+    ],
+    "answer": 0,
+    "explanation": "Cloning 基本流程是選目標 gene，使用 restriction enzyme 切 DNA/vector，用 ligase 接合，放入 host，再篩選正確 clone。",
+    "correctFeedback": "✅ Cloning 流程打通！你能從 gene 到 clone 串起來。",
+    "wrongFeedback": "❌ 不要把分析工具和建構流程混在一起。先 construct，再 transform，再 screen。",
+    "concept": "Recombinant DNA construction"
+  },
+  {
+    "id": "10-07",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Boss",
+    "prompt": "轉形後 colony 長在含抗生素培養基上。下列判斷哪個最專業？",
+    "options": [
+      "一定有正確 insert 且方向正確",
+      "一定已經大量表現目標蛋白",
+      "只能初步代表細胞可能有含 resistance marker 的 plasmid，仍需 PCR/digestion/sequencing 確認",
+      "代表 PCR contamination 一定不存在"
+    ],
+    "answer": 2,
+    "explanation": "抗生素 selection 只能篩出可能帶 plasmid 的細胞；vector alone、wrong direction、multimer 都可能發生，所以還要做 colony PCR、restriction digestion、gel 或 sequencing。",
+    "correctFeedback": "🔥 Clone screening 成功！你沒有太早宣布勝利。",
+    "wrongFeedback": "❌ 實驗室翻車！長 colony 不等於 insert 正確，更不等於 protein 表現成功。",
+    "concept": "Clone screening"
+  },
+  {
+    "id": "10-08",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "PCR 的三個基本步驟順序是？",
+    "options": [
+      "Annealing → extension → denaturation",
+      "Denaturation → annealing → extension",
+      "Extension → sequencing → FISH",
+      "Ligase → digestion → transformation"
+    ],
+    "answer": 1,
+    "explanation": "每個 PCR cycle 通常是 denaturation 打開 DNA，annealing 讓 primer 配對，extension 由 Taq polymerase 延長。",
+    "correctFeedback": "✅ PCR 循環順序正確！打開、黏上、延長。",
+    "wrongFeedback": "❌ 記住溫度邏輯：高溫打開 → 降溫 primer 黏 → 升溫延長。",
+    "concept": "PCR steps"
+  },
+  {
+    "id": "10-09",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "PCR 中 primer 的最重要功能是什麼？",
+    "options": [
+      "決定要放大的 DNA 範圍，並提供 polymerase 延長起點",
+      "把 protein 變成 DNA",
+      "切斷 β-lactam ring",
+      "讓 endospore 失去耐熱性"
+    ],
+    "answer": 0,
+    "explanation": "Primer 與 template 上的互補區域配對，決定 amplification region；同時提供 3′-OH 讓 polymerase 開始延長。",
+    "correctFeedback": "✅ 影印範圍鎖定！primer 是 PCR 的導航與起點。",
+    "wrongFeedback": "❌ PCR 不是放大整個 genome，是靠 primer 指定目標片段。",
+    "concept": "Primer"
+  },
+  {
+    "id": "10-10",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "為什麼 PCR 常使用 Taq polymerase？",
+    "options": [
+      "它耐高溫，可承受 denaturation 的高溫循環",
+      "它能直接把 RNA 變成蛋白質",
+      "它是抗生素，可殺死 template DNA",
+      "它能取代所有 primer"
+    ],
+    "answer": 0,
+    "explanation": "PCR 每輪需要 94–95°C 高溫打開 DNA，Taq polymerase 耐熱，不會每輪都被熱破壞。",
+    "correctFeedback": "✅ 耐熱酵素選對！Taq 能撐過 PCR 高溫循環。",
+    "wrongFeedback": "❌ PCR 高溫會破壞很多酵素，Taq 的重點就是耐熱。",
+    "concept": "Taq polymerase"
+  },
+  {
+    "id": "10-11",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Boss",
+    "prompt": "PCR 出現 false positive，最可能和哪個問題有關？",
+    "options": [
+      "污染 contamination 造成非目標 DNA 被放大",
+      "Primer 完全不存在所以仍放大成功",
+      "ddNTP 太多導致 band 變成蛋白質",
+      "Gel agarose 把 DNA 轉成 RNA"
+    ],
+    "answer": 0,
+    "explanation": "PCR 非常敏感，少量污染 DNA 也可能被放大，造成 false positive。",
+    "correctFeedback": "🔥 污染警報解除！你知道 PCR 靈敏度高，也代表容易被 contamination 影響。",
+    "wrongFeedback": "❌ PCR 的優點是敏感，缺點也是敏感：污染會被一起放大。",
+    "concept": "PCR contamination"
+  },
+  {
+    "id": "10-12",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "RT-PCR 的核心概念是什麼？",
+    "options": [
+      "先用 reverse transcriptase 把 RNA 轉成 cDNA，再進行 PCR",
+      "直接把 protein reverse 成 mRNA",
+      "用 restriction enzyme 讀出 sequence",
+      "用 autoclave 放大 RNA"
+    ],
+    "answer": 0,
+    "explanation": "PCR 放大的是 DNA，不是 RNA。RT-PCR 先利用 reverse transcriptase 由 RNA 做出 cDNA，再放大分析。",
+    "correctFeedback": "✅ RNA 成功轉成 cDNA！RT-PCR 的 RT 就是 reverse transcription。",
+    "wrongFeedback": "❌ RT-PCR 不是一般 PCR 直接放大 RNA，而是先做 cDNA。",
+    "concept": "RT-PCR / cDNA"
+  },
+  {
+    "id": "10-13",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "若要在細菌中表現一個人類蛋白，通常 cDNA 比 genomic DNA 更適合的原因是？",
+    "options": [
+      "cDNA 來自成熟 mRNA，通常沒有 intron；細菌無法處理真核 splicing",
+      "cDNA 一定比任何 plasmid 都大",
+      "genomic DNA 完全沒有 exon",
+      "cDNA 是蛋白質，不是核酸"
+    ],
+    "answer": 0,
+    "explanation": "cDNA 由 mRNA 反轉錄而來，通常不含 intron。細菌沒有真核 splicing 系統，因此用 cDNA 比 genomic DNA 更適合表現真核蛋白。",
+    "correctFeedback": "✅ 劇本已剪輯完成！cDNA 適合表現蛋白。",
+    "wrongFeedback": "❌ Genomic DNA 含 intron，細菌通常不會幫你剪 intron。",
+    "concept": "cDNA vs genomic DNA"
+  },
+  {
+    "id": "10-14",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Gel electrophoresis 分離 DNA 的基本原理，哪個正確？",
+    "options": [
+      "DNA 帶正電，往負極跑；大片段跑最遠",
+      "DNA 帶負電，往正極跑；小片段通過膠較快、跑較遠",
+      "DNA 不帶電，只靠顏色移動",
+      "只有 protein 能在 agarose gel 中移動"
+    ],
+    "answer": 1,
+    "explanation": "DNA phosphate backbone 帶負電，所以往正極移動；agarose gel 像分子篩，小 DNA 片段跑得比較遠。",
+    "correctFeedback": "✅ Band 判讀成功！負電往正極，小片段跑遠。",
+    "wrongFeedback": "❌ 方向和大小都很常考：DNA 帶負電，小的跑更遠。",
+    "concept": "Gel electrophoresis"
+  },
+  {
+    "id": "10-15",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Probe hybridization 的白話功能是什麼？",
+    "options": [
+      "用帶標記的互補核酸去找特定 DNA/RNA 序列",
+      "用抗生素殺死所有 host cell",
+      "用 ddNTP 讓 protein 停止延長",
+      "用 heat 讓 endospore 發芽"
+    ],
+    "answer": 0,
+    "explanation": "Probe 是帶標記的短 DNA/RNA，可與目標序列互補配對，用來偵測特定核酸序列是否存在或在哪裡。",
+    "correctFeedback": "✅ 尋人啟事貼對了！probe 找的是互補目標序列。",
+    "wrongFeedback": "❌ Probe 不是剪 DNA，也不是放大 DNA；它是用互補配對找序列。",
+    "concept": "Probe / hybridization"
+  },
+  {
+    "id": "10-16",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Southern blot、Northern blot、FISH 的用途配對，哪個正確？",
+    "options": [
+      "Southern 看 RNA；Northern 看 DNA；FISH 看 protein folding",
+      "Southern 看 DNA；Northern 看 RNA；FISH 看染色體/細胞中的位置",
+      "Southern 是 PCR；Northern 是 sequencing；FISH 是 autoclave",
+      "三者都只能測 MIC"
+    ],
+    "answer": 1,
+    "explanation": "Southern blot 用於 DNA；Northern blot 用於 RNA；FISH 使用螢光 probe 在原位觀察目標序列位置。",
+    "correctFeedback": "✅ Blot 地圖判讀成功！DNA/Southern、RNA/Northern、位置/FISH。",
+    "wrongFeedback": "❌ 考試秒殺：Southern = DNA；Northern = RNA；FISH = 螢光看位置。",
+    "concept": "Southern / Northern / FISH"
+  },
+  {
+    "id": "10-17",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Boss",
+    "prompt": "Sanger sequencing 中 ddNTP 為什麼能終止 DNA 延長？",
+    "options": [
+      "ddNTP 缺少 3′-OH，下一個 nucleotide 無法再接上",
+      "ddNTP 會直接切斷 ribosome",
+      "ddNTP 是 RNA primer 的一種，會啟動 translation",
+      "ddNTP 會讓 DNA 變成 peptidoglycan"
+    ],
+    "answer": 0,
+    "explanation": "DNA 延長需要 3′-OH 形成下一個 phosphodiester bond。ddNTP 缺少 3′-OH，因此一旦加入就停止延長。",
+    "correctFeedback": "🔥 序列讀取成功！ddNTP 是分子句點。",
+    "wrongFeedback": "❌ Sanger 核心不是背儀器，而是 ddNTP 少 3′-OH，接不下去。",
+    "concept": "Sanger sequencing / ddNTP"
+  },
+  {
+    "id": "10-18",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Normal",
+    "prompt": "Recombinant DNA products 例如 insulin 的核心概念是？",
+    "options": [
+      "把人類蛋白基因放進 host cell，讓細胞大量生產蛋白藥物",
+      "直接從 endospore 裡抽取 insulin",
+      "用 bleach 讓細菌變成人類細胞",
+      "用 microarray 讓蛋白質自動出現"
+    ],
+    "answer": 0,
+    "explanation": "重組 DNA 技術可把目標基因導入細菌、酵母或動物細胞，使其生產 insulin、HGH、EPO、Factor VIII 等蛋白產品。",
+    "correctFeedback": "✅ 生物小工廠啟動！細胞幫你做蛋白藥。",
+    "wrongFeedback": "❌ Recombinant protein 是靠導入基因讓 host 生產，不是靠消毒劑或孢子。",
+    "concept": "Recombinant protein"
+  },
+  {
+    "id": "10-19",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "GMO 和 transgenic organism 的關係，下列哪個最合理？",
+    "options": [
+      "GMO 是廣義基因改造；transgenic 特別指導入外來基因的生物",
+      "transgenic 一定不是 GMO",
+      "GMO 只能是病毒，不能是植物",
+      "GMO 只代表做過 gel electrophoresis 的 DNA"
+    ],
+    "answer": 0,
+    "explanation": "GMO 指人為改變基因的生物；transgenic organism 是加入外來 gene 的生物，可視為 GMO 的一類。",
+    "correctFeedback": "✅ 名詞範圍判斷正確！GMO 廣，transgenic 較特定。",
+    "wrongFeedback": "❌ 轉基因生物通常屬於 GMO，但 GMO 不只一種形式。",
+    "concept": "GMO / transgenic"
+  },
+  {
+    "id": "10-20",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "植物基因工程中，Agrobacterium 的 Ti plasmid 為什麼常被利用？",
+    "options": [
+      "它原本就能把 DNA 送進植物細胞，科學家可改造成載體",
+      "它能把植物直接變成 endospore",
+      "它是人類 ribosome 的 50S subunit",
+      "它專門破壞 β-lactam ring"
+    ],
+    "answer": 0,
+    "explanation": "Agrobacterium 的 Ti plasmid 原本能將 DNA 送入植物 genome，科學家可改造它來導入目標基因。",
+    "correctFeedback": "✅ 植物基因快遞員出動！Ti plasmid 是重要線索。",
+    "wrongFeedback": "❌ Ti plasmid 不是抗生素酵素，它是植物基因轉殖常用載體。",
+    "concept": "Agrobacterium / Ti plasmid"
+  },
+  {
+    "id": "10-21",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Normal",
+    "prompt": "Golden rice 的代表性目的最接近哪個？",
+    "options": [
+      "讓 rice 產生 beta-carotene，作為 vitamin A 前驅物",
+      "讓 rice 產生 β-lactamase 抗藥性",
+      "讓 rice 失去所有 DNA",
+      "讓 rice 可進行 bacterial conjugation"
+    ],
+    "answer": 0,
+    "explanation": "Golden rice 透過基因工程讓稻米產生 beta-carotene，作為 vitamin A 的前驅物，用於營養強化。",
+    "correctFeedback": "✅ 營養強化概念正確！Golden rice = beta-carotene。",
+    "wrongFeedback": "❌ Golden rice 不是抗生素抗藥示範，而是營養強化 GMO 例子。",
+    "concept": "Golden rice"
+  },
+  {
+    "id": "10-22",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Knockout mouse 最常用來回答哪種問題？",
+    "options": [
+      "某個 gene 缺失後會造成什麼功能或表型改變",
+      "哪個抗生素 MIC 最小",
+      "哪個消毒劑可以殺 endospore",
+      "PCR primer 是否有 3′-OH"
+    ],
+    "answer": 0,
+    "explanation": "Knockout mouse 是把特定 gene 打掉，用來觀察該基因在疾病、生理或發育上的功能。",
+    "correctFeedback": "✅ 基因功能偵探成功！打掉 gene 看 phenotype。",
+    "wrongFeedback": "❌ Knockout 是基因功能研究，不是藥敏或消毒測試。",
+    "concept": "Knockout mouse"
+  },
+  {
+    "id": "10-23",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Boss",
+    "prompt": "Gene therapy 的困難不只是把 gene 送進去。下列哪個是合理風險？",
+    "options": [
+      "插入位置不當可能影響重要基因，甚至造成癌化風險",
+      "只要送入 gene，所有細胞一定永久正確表現",
+      "virus vector 一定完全無風險",
+      "functional gene 會自動殺死所有細菌"
+    ],
+    "answer": 0,
+    "explanation": "Gene therapy 需要考慮 delivery、expression、retention 和 insertional risk。若插入位置影響癌症相關基因，可能帶來安全問題。",
+    "correctFeedback": "🔥 安全性關卡通過！你知道基因治療不是打一針就好。",
+    "wrongFeedback": "❌ Gene therapy 的難點在送達、留存、正確表現與安全性。",
+    "concept": "Gene therapy safety"
+  },
+  {
+    "id": "10-24",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Hard",
+    "prompt": "Antisense DNA/RNA 的核心機制是什麼？",
+    "options": [
+      "與 mRNA 互補配對，阻止 translation 或降低目標 protein 表現",
+      "與 peptidoglycan cross-link 形成細胞壁",
+      "與 endospore cortex 配對產生熱抗性",
+      "作為 50S ribosomal subunit"
+    ],
+    "answer": 0,
+    "explanation": "Antisense 會與目標 mRNA 互補配對，使 ribosome 不易翻譯，降低不想要蛋白質的表現。",
+    "correctFeedback": "✅ mRNA 被封嘴！Antisense 是用互補配對阻止表現。",
+    "wrongFeedback": "❌ Antisense 不是抗生素膜破壞劑，它是核酸層級的表現控制。",
+    "concept": "Antisense"
+  },
+  {
+    "id": "10-25",
+    "chapter": "第10章｜Genetic Engineering",
+    "difficulty": "Boss",
+    "prompt": "Microarray analysis 最主要回答什麼問題？",
+    "options": [
+      "哪些 genes 正在被轉錄，normal vs cancer cell 的 gene expression 有何差異",
+      "某段 DNA 的每個 A/T/G/C 正確順序",
+      "哪個抗生素抑制圈最大",
+      "哪個消毒法能殺 endospore"
+    ],
+    "answer": 0,
+    "explanation": "Microarray 可一次觀察大量 gene expression，常比較不同狀態下哪些基因表現高、低或不表現。Sequencing 才是讀 A/T/G/C 順序。",
+    "correctFeedback": "🔥 表現圖譜判讀成功！Microarray 看 gene expression，不是直接讀序列。",
+    "wrongFeedback": "❌ 別把 microarray 和 sequencing 混了：microarray 看誰開關，sequencing 讀字母順序。",
+    "concept": "Microarray"
+  },
+  {
+    "id": "11-01",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Normal",
+    "prompt": "Contamination 最白話的意思是什麼？",
+    "options": [
+      "不該出現的微生物出現了",
+      "所有微生物都被完全殺光",
+      "細菌進行 DNA replication",
+      "抗生素 MIC 下降"
+    ],
+    "answer": 0,
+    "explanation": "Contamination 是本來不該有微生物的地方出現微生物，中文可說污染。",
+    "correctFeedback": "✅ 污染警報判斷正確！",
+    "wrongFeedback": "❌ Contamination 不是滅菌成功，而是不該有菌卻有菌。",
+    "concept": "Contamination"
+  },
+  {
+    "id": "11-02",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Microbial control 的核心目標最完整是？",
+    "options": [
+      "只用抗生素治療人體感染",
+      "用物理或化學方法 destroy 或 reduce 微生物",
+      "讓所有細菌進行 conjugation",
+      "讓病毒產生 peptidoglycan"
+    ],
+    "answer": 1,
+    "explanation": "Microbial control 可透過物理與化學方法殺死或降低微生物數量，屬於 decontamination 的概念。",
+    "correctFeedback": "✅ 控制任務啟動！不一定殺光，也可能是降低到安全程度。",
+    "wrongFeedback": "❌ Microbial control 不等於只用抗生素，也不一定完全滅菌。",
+    "concept": "Microbial control"
+  },
+  {
+    "id": "11-03",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Microbistatic 的正確理解是？",
+    "options": [
+      "直接殺死所有微生物與 endospore",
+      "讓微生物停止生長，但可能還活著，條件恢復後可再生長",
+      "只殺病毒，不影響細菌",
+      "專指高壓蒸氣滅菌"
+    ],
+    "answer": 1,
+    "explanation": "Microbistatic 是抑制生長，不一定殺死。人體用藥常考慮毒性，所以有時使用抑菌而非殺菌。",
+    "correctFeedback": "✅ 抑菌概念精準！停下來不等於死掉。",
+    "wrongFeedback": "❌ static 是停止/抑制，不是 cidal 殺死。",
+    "concept": "Microbistatic"
+  },
+  {
+    "id": "11-04",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Normal",
+    "prompt": "下列哪個字尾最明確表示「殺死」？",
+    "options": [
+      "-static",
+      "-cidal / -cide",
+      "-genic",
+      "-trophic"
+    ],
+    "answer": 1,
+    "explanation": "-cidal 或 -cide 表示殺死，如 bactericide 殺細菌、fungicide 殺真菌、virucide 殺病毒、sporicide 殺孢子。",
+    "correctFeedback": "✅ 殺菌字尾命中！cidal/cide = kill。",
+    "wrongFeedback": "❌ static 是抑制，不是殺死。",
+    "concept": "Germicide terminology"
+  },
+  {
+    "id": "11-05",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Sanitization 的定位最合理是？",
+    "options": [
+      "最強，殺死所有 endospore",
+      "降低物品上的微生物到安全水平，不一定無菌",
+      "專門用在人體血液內",
+      "等於 bacterial conjugation"
+    ],
+    "answer": 1,
+    "explanation": "Sanitization 是衛生處理，通常用在物品，目標是降低到 safe level，不是完全殺光。",
+    "correctFeedback": "✅ 安全水平達標！Sanitization 不追求完全無菌。",
+    "wrongFeedback": "❌ 最強的是 sterilization，不是 sanitization。",
+    "concept": "Sanitization"
+  },
+  {
+    "id": "11-06",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "洗手或用酒精擦皮膚，最接近哪個 microbial control 概念？",
+    "options": [
+      "Degermation",
+      "Sterilization",
+      "Transduction",
+      "Sequencing"
+    ],
+    "answer": 0,
+    "explanation": "Degermation 是降低皮膚表面的微生物數量，常見例子是洗手、酒精擦拭。",
+    "correctFeedback": "✅ 皮膚除菌成功！Degermation 是人體表面的降低菌量。",
+    "wrongFeedback": "❌ 皮膚不會做 sterilization；那是完全無菌且通常用於耐受物品。",
+    "concept": "Degermation"
+  },
+  {
+    "id": "11-07",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Disinfection 和 sterilization 最大差別是？",
+    "options": [
+      "Disinfection 一定殺 endospore；sterilization 不會",
+      "Disinfection 殺大部分病原但不保證全殺；sterilization 殺所有微生物含 endospore",
+      "兩者都只能用在 mRNA",
+      "兩者都等於 PCR"
+    ],
+    "answer": 1,
+    "explanation": "Disinfection 多用於物品，可殺大部分病原菌但不一定殺 endospore；sterilization 目標是完全無菌，包含 endospore。",
+    "correctFeedback": "✅ 消毒與滅菌分清楚！差別在完全性與 endospore。",
+    "wrongFeedback": "❌ 不要把消毒當滅菌。Disinfection 通常不保證殺掉 endospore。",
+    "concept": "Disinfection vs sterilization"
+  },
+  {
+    "id": "11-08",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Boss",
+    "prompt": "手術器械若要達到真正無菌，最應追求哪個標準？",
+    "options": [
+      "Sanitization",
+      "Degermation",
+      "Sterilization",
+      "Microbistatic"
+    ],
+    "answer": 2,
+    "explanation": "手術器械要避免任何微生物進入身體，因此需要 sterilization，目標是殺所有微生物，包括 endospore。",
+    "correctFeedback": "🔥 無菌防線完成！手術器械要 sterilization。",
+    "wrongFeedback": "❌ 手術器械不是降低到安全就好，應追求完全無菌。",
+    "concept": "Sterilization"
+  },
+  {
+    "id": "11-09",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "若一個方法能殺死 endospore，代表它最接近哪個等級？",
+    "options": [
+      "Sanitization",
+      "Sterilization 或 sporicidal 等級",
+      "Degermation",
+      "Microbistatic only"
+    ],
+    "answer": 1,
+    "explanation": "Endospore 是最難殺的類型之一。能殺 endospore 通常代表 sterilization 或具有 sporicidal 能力。",
+    "correctFeedback": "✅ 終極耐受怪被擊破！Endospore 是滅菌標準的重要指標。",
+    "wrongFeedback": "❌ Endospore 很耐高溫與化學藥劑，不是普通降低菌量能解決。",
+    "concept": "Endospore / sterilization"
+  },
+  {
+    "id": "11-10",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "下列微生物或結構中，通常最難殺的是？",
+    "options": [
+      "Enveloped virus",
+      "Vegetative bacterial cell",
+      "Endospore",
+      "Yeast vegetative cell"
+    ],
+    "answer": 2,
+    "explanation": "Endospore 抗性最高，能耐高溫、乾燥與許多化學藥劑。Enveloped virus 因有脂質包膜，通常較容易被 detergent/alcohol 破壞。",
+    "correctFeedback": "✅ 最硬 Boss 辨識成功！Endospore 最難殺。",
+    "wrongFeedback": "❌ 有包膜病毒通常較脆弱；endospore 才是耐受王。",
+    "concept": "Resistance ranking"
+  },
+  {
+    "id": "11-11",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Naked virus 通常比 enveloped virus 難處理，主要原因是？",
+    "options": [
+      "Enveloped virus 的脂質膜容易被 alcohol/detergent 破壞",
+      "Naked virus 有 peptidoglycan cell wall",
+      "Enveloped virus 沒有遺傳物質",
+      "Naked virus 一定能形成 endospore"
+    ],
+    "answer": 0,
+    "explanation": "有包膜病毒的 envelope 是脂質膜，容易被酒精或 detergent 破壞；naked virus 沒有這層脆弱脂質膜，通常抗性較高。",
+    "correctFeedback": "✅ 病毒弱點命中！脂質包膜是好打的地方。",
+    "wrongFeedback": "❌ 病毒沒有 peptidoglycan，也不會形成 endospore。",
+    "concept": "Naked vs enveloped virus"
+  },
+  {
+    "id": "11-12",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Filtration 的原理最精準是？",
+    "options": [
+      "不是殺菌，而是把微生物從液體或空氣中移除",
+      "用 β-lactam 破壞 cell wall",
+      "用 ddNTP 讓 DNA 停止延長",
+      "用 allolactose 關閉 operon"
+    ],
+    "answer": 0,
+    "explanation": "Filtration 像篩子，把細菌等微生物卡住移除；它不是直接殺死微生物。",
+    "correctFeedback": "✅ 過濾防線成功！你知道 filtration 是拿掉，不是殺掉。",
+    "wrongFeedback": "❌ Filtration 的重點是 remove，不是 kill。",
+    "concept": "Filtration"
+  },
+  {
+    "id": "11-13",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "0.22 μm membrane filter 最常用來移除什麼？",
+    "options": [
+      "一般細菌",
+      "所有病毒與所有蛋白質",
+      "人類染色體",
+      "所有溶解性毒素"
+    ],
+    "answer": 0,
+    "explanation": "0.22 μm 濾膜常用來去除一般細菌，但不保證移除所有病毒或小分子毒素。",
+    "correctFeedback": "✅ 篩孔大小判斷正確！0.22 μm 常用於細菌過濾。",
+    "wrongFeedback": "❌ 0.22 μm 可去很多細菌，但不是萬能，特別是病毒可能更小。",
+    "concept": "0.22 μm filter"
+  },
+  {
+    "id": "11-14",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "HEPA filter 最符合哪個用途？",
+    "options": [
+      "空氣過濾",
+      "DNA sequencing",
+      "β-lactamase inhibition",
+      "讓 mRNA splicing"
+    ],
+    "answer": 0,
+    "explanation": "HEPA filter 用於空氣過濾，移除空氣中的微粒與微生物相關顆粒。",
+    "correctFeedback": "✅ 空氣防線啟動！HEPA = air filtration。",
+    "wrongFeedback": "❌ HEPA 不是分子生物技術，也不是抗生素。",
+    "concept": "HEPA"
+  },
+  {
+    "id": "11-15",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Boss",
+    "prompt": "你有一瓶熱敏感抗體溶液，懷疑被一般細菌污染，但不能破壞蛋白活性。最合理處理是？",
+    "options": [
+      "Autoclave",
+      "Dry heat",
+      "0.22 μm filtration",
+      "直接加入漂白水後注射"
+    ],
+    "answer": 2,
+    "explanation": "熱敏感蛋白或抗體不適合加熱滅菌，常用 filtration 移除細菌；要注意 filtration 是移除，不是殺死。",
+    "correctFeedback": "🔥 樣品保住了！熱敏感液體選 filtration。",
+    "wrongFeedback": "❌ 樣品報廢！高溫或漂白水會破壞蛋白/造成不可用。",
+    "concept": "Heat-sensitive liquid / filtration"
+  },
+  {
+    "id": "11-16",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "若 microbial control 的目標是 cell membrane，被破壞後最可能發生什麼？",
+    "options": [
+      "物質外漏、離子失衡，細胞功能崩潰",
+      "DNA codon 變成 intron",
+      "ribosome 變成 endospore",
+      "所有 gene 都變成 plasmid"
+    ],
+    "answer": 0,
+    "explanation": "細胞膜控制通透性。膜被破壞後，細胞內容物外漏、離子濃度失衡，代謝與存活受影響。",
+    "correctFeedback": "✅ 膜破裂效果判斷正確！通透性失控會讓細胞崩潰。",
+    "wrongFeedback": "❌ Cell membrane 的重點是 permeability，不是基因剪接。",
+    "concept": "Cell membrane target"
+  },
+  {
+    "id": "11-17",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "Alcohol 或 heat 造成 protein denaturation 時，最直接影響是？",
+    "options": [
+      "酵素結構改變，功能失效，代謝停止",
+      "DNA 變成 plasmid",
+      "細胞壁自動變厚",
+      "病毒產生 ribosome"
+    ],
+    "answer": 0,
+    "explanation": "Protein denaturation 會破壞蛋白質立體結構，使酵素失去功能，細胞代謝與生存受到影響。",
+    "correctFeedback": "✅ 蛋白質失活成功！denaturation = 結構壞掉、功能消失。",
+    "wrongFeedback": "❌ 蛋白質變性不是 DNA 改造成 plasmid。",
+    "concept": "Protein denaturation"
+  },
+  {
+    "id": "11-18",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "UV light 作為 microbial control 方法時，最主要打擊目標是？",
+    "options": [
+      "DNA/RNA，干擾 replication 或 transcription",
+      "Peptidoglycan cross-link only",
+      "Folic acid synthesis only",
+      "Ribosome A site only"
+    ],
+    "answer": 0,
+    "explanation": "UV 可造成核酸損傷，例如 DNA 形成 thymine dimers，干擾複製與轉錄。",
+    "correctFeedback": "✅ 核酸傷害命中！UV 主要連到 DNA/RNA 損傷。",
+    "wrongFeedback": "❌ UV 不是典型 β-lactam，也不是專門打葉酸路徑。",
+    "concept": "UV / nucleic acid damage"
+  },
+  {
+    "id": "11-19",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Normal",
+    "prompt": "Bactericide、fungicide、virucide、sporicide 的共同概念是？",
+    "options": [
+      "都屬於殺死特定微生物或結構的劑型",
+      "都只是抑制但不殺",
+      "都只能用於 translation",
+      "都代表 PCR 放大成功"
+    ],
+    "answer": 0,
+    "explanation": "這些字都帶有 -cide，表示殺死；bactericide 殺細菌，fungicide 殺真菌，virucide 殺病毒，sporicide 殺孢子。",
+    "correctFeedback": "✅ -cide 家族辨識成功！",
+    "wrongFeedback": "❌ -cide 是殺；-static 才是抑制。",
+    "concept": "Germicide"
+  },
+  {
+    "id": "11-20",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "如果一個處理方法只要求餐具表面微生物降到公共衛生可接受水平，最貼近哪個概念？",
+    "options": [
+      "Sanitization",
+      "Sterilization",
+      "Transduction",
+      "Sequencing"
+    ],
+    "answer": 0,
+    "explanation": "洗碗、餐廳清潔等通常屬 sanitization，目標是 safe level，不是完全無菌。",
+    "correctFeedback": "✅ 餐具防線達標！Sanitization = 安全即可。",
+    "wrongFeedback": "❌ 餐具清潔通常不等於完全無菌滅菌。",
+    "concept": "Sanitization example"
+  },
+  {
+    "id": "11-21",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Boss",
+    "prompt": "桌面灑到細菌培養液，要處理桌面，較合理用語是 disinfection；但若要處理手術器械，應是 sterilization。這背後邏輯是什麼？",
+    "options": [
+      "桌面只需降低大部分病原風險；手術器械需完全無菌，包含 endospore",
+      "桌面一定要保留 endospore；手術器械不能殺菌",
+      "兩者差異只在英文長短",
+      "disinfection 比 sterilization 更強"
+    ],
+    "answer": 0,
+    "explanation": "Disinfection 常用於無生命物品表面，殺大部分病原；sterilization 是最高等級，殺所有微生物含 endospore，適合手術器械。",
+    "correctFeedback": "🔥 控制等級選擇成功！你能依情境選方法。",
+    "wrongFeedback": "❌ 不同場景需要不同強度：桌面消毒，手術器械滅菌。",
+    "concept": "Scenario: disinfection vs sterilization"
+  },
+  {
+    "id": "11-22",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "下列哪個最不適合直接用於人體皮膚？",
+    "options": [
+      "Degermation 方法如洗手",
+      "高壓蒸氣 autoclave 皮膚",
+      "酒精擦拭皮膚",
+      "降低皮膚表面微生物"
+    ],
+    "answer": 1,
+    "explanation": "Autoclave 是高壓蒸氣滅菌，通常用於耐高溫物品，不會用於人體皮膚。",
+    "correctFeedback": "✅ 人體安全判斷正確！皮膚只能降菌，不可能 autoclave。",
+    "wrongFeedback": "❌ 皮膚處理是 degermation/antiseptic 類，不是高壓蒸氣滅菌。",
+    "concept": "Human tissue vs objects"
+  },
+  {
+    "id": "11-23",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "若某方法主要破壞 bacterial cell wall，細菌最可能因什麼原因死亡？",
+    "options": [
+      "滲透壓無法維持，cell lysis",
+      "mRNA 變成 stop codon",
+      "plasmid 變成 capsid",
+      "ribosome 離開細胞核"
+    ],
+    "answer": 0,
+    "explanation": "Cell wall 維持細菌形狀與抵抗滲透壓。細胞壁被破壞後，細菌可能因 osmotic pressure 而 lysis。",
+    "correctFeedback": "✅ 細胞壁崩塌！lysis 是合理結果。",
+    "wrongFeedback": "❌ 細胞壁主要連到結構與滲透壓，不是 mRNA stop codon。",
+    "concept": "Cell wall target / lysis"
+  },
+  {
+    "id": "11-24",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Hard",
+    "prompt": "為什麼 microbial control 不一定等於 sterilization？",
+    "options": [
+      "Control 可以只是降低微生物數量到可接受水平；sterilization 才是完全殺光",
+      "Control 一定比 sterilization 更強",
+      "Sterilization 只會讓微生物停止但不死",
+      "Control 只發生在 DNA sequencing"
+    ],
+    "answer": 0,
+    "explanation": "Microbial control 是廣義概念，可包含降低、抑制或殺死；sterilization 是最強等級，目標完全無菌。",
+    "correctFeedback": "✅ 大小概念清楚！Control 是大範圍，sterilization 是最高強度。",
+    "wrongFeedback": "❌ 控制微生物不代表每次都要完全無菌。",
+    "concept": "Microbial control vs sterilization"
+  },
+  {
+    "id": "11-25",
+    "chapter": "第11章｜Microbial Control",
+    "difficulty": "Boss",
+    "prompt": "某病房出現有包膜病毒污染。下列哪個觀念最能解釋 alcohol/detergent 通常有效？",
+    "options": [
+      "有包膜病毒的 envelope 是脂質膜，容易被破壞；包膜壞掉後感染能力下降",
+      "有包膜病毒有 endospore，所以酒精能讓它發芽",
+      "酒精主要讓病毒產生 peptidoglycan",
+      "detergent 會幫病毒完成 transcription"
+    ],
+    "answer": 0,
+    "explanation": "Enveloped virus 外層有 lipid envelope，alcohol/detergent 可破壞脂質膜，使病毒失去感染所需結構。",
+    "correctFeedback": "🔥 病毒外套被拆掉！你抓到 envelope 是弱點。",
+    "wrongFeedback": "❌ 病毒沒有 endospore，也沒有 peptidoglycan cell wall。",
+    "concept": "Enveloped virus control"
+  },
+  {
+    "id": "12-01",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Normal",
+    "prompt": "Selective toxicity 的最佳白話解釋是？",
+    "options": [
+      "藥物越毒越好",
+      "利用微生物和宿主的差異，盡量傷微生物、不傷宿主",
+      "只要是藥都一定完全無副作用",
+      "只攻擊人體細胞"
+    ],
+    "answer": 1,
+    "explanation": "選擇性毒性是抗微生物治療核心：攻擊微生物特有或與人體不同的結構/路徑。",
+    "correctFeedback": "✅ 魔法子彈命中！你抓到 selective toxicity。",
+    "wrongFeedback": "❌ 抗微生物藥不是越毒越好，而是要對敵人毒、對宿主低毒。",
+    "concept": "Selective toxicity"
+  },
+  {
+    "id": "12-02",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "為什麼打 bacterial cell wall 通常比打 cell membrane 更有選擇性？",
+    "options": [
+      "人體細胞也有 peptidoglycan",
+      "人體細胞沒有 peptidoglycan cell wall，但人體也有 cell membrane",
+      "細胞膜不是生命必需",
+      "病毒都有 cell wall"
+    ],
+    "answer": 1,
+    "explanation": "人體細胞沒有細菌的 peptidoglycan cell wall，所以 cell wall synthesis inhibitors 較具選擇性；而人體細胞也有細胞膜，膜作用藥較可能有毒性。",
+    "correctFeedback": "✅ 安全弱點判斷正確！細菌 cell wall 是好靶點。",
+    "wrongFeedback": "❌ 人體沒有 peptidoglycan，但有細胞膜；所以打膜通常較危險。",
+    "concept": "Selective toxicity / cell wall"
+  },
+  {
+    "id": "12-03",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Normal",
+    "prompt": "Paul Ehrlich 的 magic bullet 概念最接近？",
+    "options": [
+      "只打微生物，不太傷宿主",
+      "所有藥都同時殺死病人和微生物",
+      "只要是化學藥物都只能治癌症",
+      "抗生素能治療所有病毒"
+    ],
+    "answer": 0,
+    "explanation": "Magic bullet 指像魔法子彈一樣精準打擊病原，而不傷害宿主，是 selective toxicity 的早期概念。",
+    "correctFeedback": "✅ 魔法子彈概念掌握！",
+    "wrongFeedback": "❌ Magic bullet 不是亂殺，而是選擇性攻擊病原。",
+    "concept": "Magic bullet"
+  },
+  {
+    "id": "12-04",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Narrow-spectrum 與 broad-spectrum 的比較，下列哪個最合理？",
+    "options": [
+      "Broad-spectrum 永遠比 narrow-spectrum 好，沒有風險",
+      "Narrow-spectrum 打比較少種類，通常對正常菌叢影響較小；broad-spectrum 方便但可能破壞 microbiota",
+      "Narrow-spectrum 一定只打病毒",
+      "Broad-spectrum 不會造成 selection pressure"
+    ],
+    "answer": 1,
+    "explanation": "廣效藥對多種微生物有效，但也更可能影響正常菌叢並增加抗藥菌篩選壓力。窄效藥較精準。",
+    "correctFeedback": "✅ 範圍選擇判斷正確！廣效方便但不是永遠最好。",
+    "wrongFeedback": "❌ 廣效不是萬靈丹，可能破壞正常菌叢並促進抗藥壓力。",
+    "concept": "Spectrum"
+  },
+  {
+    "id": "12-05",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "病原還沒確認時先用 broad-spectrum，主要好處與風險是？",
+    "options": [
+      "好處是可先涵蓋較多可能病原；風險是破壞正常菌叢與抗藥壓力",
+      "好處是完全無副作用；風險是一定不能殺菌",
+      "好處是只殺病毒；風險是產生 peptidoglycan",
+      "好處是不用考慮病人狀況；風險是會造成 splicing"
+    ],
+    "answer": 0,
+    "explanation": "Broad-spectrum 在未知病原時可先涵蓋多種菌，但會影響更多正常菌叢，也可能造成 resistance selection。",
+    "correctFeedback": "✅ 臨床取捨正確！先救急但要注意副作用與抗藥。",
+    "wrongFeedback": "❌ 廣效藥不能無腦使用，會增加菌叢破壞與抗藥壓力。",
+    "concept": "Broad-spectrum use"
+  },
+  {
+    "id": "12-06",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Normal",
+    "prompt": "選抗微生物藥時，最基本要同時考慮哪三者？",
+    "options": [
+      "藥物、微生物、宿主",
+      "天氣、桌子、投影機",
+      "病毒、植物、光合作用",
+      "PCR、gel、sequencing"
+    ],
+    "answer": 0,
+    "explanation": "抗微生物治療要看 drug toxicity、microbe sensitivity、host health。",
+    "correctFeedback": "✅ 三角關係掌握！藥、菌、人都要看。",
+    "wrongFeedback": "❌ 選藥不是只看藥名，還要看病原和病人狀況。",
+    "concept": "Therapy factors"
+  },
+  {
+    "id": "12-07",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Penicillin / β-lactam 最主要阻止什麼？",
+    "options": [
+      "Peptidoglycan cross-link formation",
+      "Viral capsid assembly",
+      "Human cholesterol synthesis only",
+      "tRNA 進入 80S ribosome"
+    ],
+    "answer": 0,
+    "explanation": "β-lactam 類藥物抑制 peptidoglycan cross-link，使細菌 cell wall 變脆，可能 lysis。",
+    "correctFeedback": "✅ 細胞壁弱點命中！β-lactam 打 cross-link。",
+    "wrongFeedback": "❌ Penicillin 不是抗病毒，也不是專門打人體 cholesterol。",
+    "concept": "β-lactam / peptidoglycan"
+  },
+  {
+    "id": "12-08",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "β-lactam ring 被 β-lactamase 破壞後，最直接結果是？",
+    "options": [
+      "藥物失去或大幅降低活性",
+      "藥物變成更強的 ribosome inhibitor",
+      "細菌一定沒有 cell wall",
+      "病毒 envelope 被加厚"
+    ],
+    "answer": 0,
+    "explanation": "β-lactam ring 是 β-lactam 藥物作用的核心。β-lactamase 切壞它會造成抗藥性。",
+    "correctFeedback": "✅ 抗藥剪刀辨識成功！β-lactamase 讓藥失效。",
+    "wrongFeedback": "❌ β-lactamase 不是幫藥物變強，而是破壞 β-lactam ring。",
+    "concept": "β-lactamase"
+  },
+  {
+    "id": "12-09",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Amoxicillin + clavulanate 的設計邏輯是什麼？",
+    "options": [
+      "Clavulanate 抑制 β-lactamase，保護 amoxicillin",
+      "Clavulanate 直接變成 viral DNA",
+      "Amoxicillin 專門治療所有真菌",
+      "兩者合用是為了讓 MIC 無限大"
+    ],
+    "answer": 0,
+    "explanation": "Clavulanate 是 β-lactamase inhibitor，可保護 amoxicillin 不被 β-lactamase 破壞。",
+    "correctFeedback": "✅ 抗生素保鑣上場！clavulanate 保護 amoxicillin。",
+    "wrongFeedback": "❌ Clavulanate 不是主要殺菌者，它主要抑制 β-lactamase。",
+    "concept": "Clavulanate"
+  },
+  {
+    "id": "12-10",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Cephalosporins 與 penicillins 的重要共同點是？",
+    "options": [
+      "都屬 β-lactam antibiotics",
+      "都只能治療病毒",
+      "都作用在 fungal ergosterol",
+      "都不可能有抗藥性"
+    ],
+    "answer": 0,
+    "explanation": "Penicillins 與 cephalosporins 都屬 β-lactam 類，核心與 cell wall synthesis inhibition 有關。",
+    "correctFeedback": "✅ β-lactam 家族辨識成功！",
+    "wrongFeedback": "❌ Cephalosporins 不是抗病毒藥，也不是 ergosterol 藥物。",
+    "concept": "Cephalosporins"
+  },
+  {
+    "id": "12-11",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Boss",
+    "prompt": "Sulfonamides 為什麼能有選擇性毒性？",
+    "options": [
+      "細菌需由 PABA 合成 folic acid；人類主要從飲食取得葉酸，不靠同一路徑",
+      "人類沒有 DNA，所以不需要 folate",
+      "細菌沒有任何代謝路徑",
+      "Sulfa 只會破壞病毒 envelope"
+    ],
+    "answer": 0,
+    "explanation": "Sulfonamides 類似 PABA，競爭性抑制細菌葉酸合成；人類主要從飲食取得葉酸，因此有選擇性。",
+    "correctFeedback": "🔥 代謝路徑弱點命中！細菌自己做葉酸，人類主要用吃的。",
+    "wrongFeedback": "❌ 人類也需要 DNA 和 folate，但取得方式與細菌不同。",
+    "concept": "Sulfa / folate"
+  },
+  {
+    "id": "12-12",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Sulfa + trimethoprim 合用常被稱為 synergistic effect，原因是？",
+    "options": [
+      "兩者打同一條 folate pathway 的不同步驟，使阻斷更有效",
+      "兩者都完全沒有副作用",
+      "兩者會讓細菌產生更多 PABA",
+      "兩者合用會讓病毒變成細菌"
+    ],
+    "answer": 0,
+    "explanation": "Sulfa 阻止 PABA 進入葉酸路徑，trimethoprim 抑制後續步驟；連續阻斷同一路徑可增強效果。",
+    "correctFeedback": "✅ 雙段封鎖成功！同一路徑不同步驟一起卡。",
+    "wrongFeedback": "❌ 協同不是因為完全無毒，而是因為同一路徑被連續阻斷。",
+    "concept": "Synergistic effect"
+  },
+  {
+    "id": "12-13",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "為什麼某些 protein synthesis inhibitors 可選擇性作用於細菌？",
+    "options": [
+      "細菌 ribosome 是 70S = 30S + 50S，和人體 cytoplasmic 80S 不同",
+      "人體完全沒有 ribosome",
+      "細菌沒有 protein synthesis",
+      "所有藥物都只認得 DNA"
+    ],
+    "answer": 0,
+    "explanation": "細菌核糖體 70S 與人體細胞質核糖體 80S 不同，因此可作為選擇性靶點。但 mitochondria ribosome 類似細菌，仍可能造成毒性。",
+    "correctFeedback": "✅ Ribosome 差異抓到了！70S vs 80S 是考點。",
+    "wrongFeedback": "❌ 人體也有 ribosome，只是與細菌不同。",
+    "concept": "70S ribosome"
+  },
+  {
+    "id": "12-14",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Tetracycline 的作用最接近哪個？",
+    "options": [
+      "阻止 tRNA 進入 A site，使 protein elongation 受阻",
+      "破壞 β-lactam ring",
+      "讓 allolactose 離開 repressor",
+      "直接形成 endospore"
+    ],
+    "answer": 0,
+    "explanation": "Tetracycline 作用於 30S，阻止 aminoacyl-tRNA 進入 A site，使新胺基酸送不進去。",
+    "correctFeedback": "✅ A site 被封鎖！tetracycline 機制掌握。",
+    "wrongFeedback": "❌ Tetracycline 是 protein synthesis inhibitor，不是 β-lactamase inhibitor。",
+    "concept": "Tetracycline"
+  },
+  {
+    "id": "12-15",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Erythromycin / macrolide 主要會阻礙哪個 translation 流程？",
+    "options": [
+      "Translocation",
+      "DNA denaturation",
+      "Folate synthesis",
+      "Peptidoglycan cross-link"
+    ],
+    "answer": 0,
+    "explanation": "Macrolides 如 erythromycin 常阻礙 ribosome translocation，使 ribosome 走不動，protein synthesis 受阻。",
+    "correctFeedback": "✅ Ribosome 卡住了！macrolide 阻止 translocation。",
+    "wrongFeedback": "❌ Macrolide 不是 cell wall 藥，也不是 PCR denaturation。",
+    "concept": "Macrolide"
+  },
+  {
+    "id": "12-16",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Chloramphenicol 雖有效但臨床需小心，重要原因是？",
+    "options": [
+      "可能造成嚴重骨髓毒性",
+      "一定完全無副作用",
+      "只會用來治療蛔蟲",
+      "它是 β-lactamase 的食物"
+    ],
+    "answer": 0,
+    "explanation": "Chloramphenicol 可抑制 peptide bond formation，但毒性大，可能造成嚴重甚至不可逆的骨髓傷害。",
+    "correctFeedback": "✅ 毒性警報正確！有效不代表安全。",
+    "wrongFeedback": "❌ Chloramphenicol 的重點之一就是毒性，特別是骨髓問題。",
+    "concept": "Chloramphenicol"
+  },
+  {
+    "id": "12-17",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Polymyxin 類藥物常因毒性受限制，原因最接近？",
+    "options": [
+      "它破壞膜，而人體細胞也有膜，選擇性不完全",
+      "它只作用在病毒 capsid，所以對人類最毒",
+      "它只會增加 normal microbiota",
+      "它專門切 DNA primer"
+    ],
+    "answer": 0,
+    "explanation": "Polymyxins 作用於 bacterial membrane，尤其 Gram-negative。因為宿主細胞也有膜，膜作用藥物常較毒。",
+    "correctFeedback": "✅ 膜攻擊風險判斷正確！打膜容易波及宿主。",
+    "wrongFeedback": "❌ 打膜不是最安全的靶點；人體細胞也有 membrane。",
+    "concept": "Polymyxin / membrane toxicity"
+  },
+  {
+    "id": "12-18",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "抗黴菌藥比抗細菌藥更難做到高選擇性，主因是？",
+    "options": [
+      "真菌是真核，與人體細胞相似度高",
+      "真菌一定沒有細胞膜",
+      "真菌都有 peptidoglycan cell wall",
+      "人體細胞和細菌完全一樣"
+    ],
+    "answer": 0,
+    "explanation": "真菌與人體都是真核細胞，細胞結構與代謝較相似，因此選擇性毒性較難。常見靶點是 ergosterol 等差異。",
+    "correctFeedback": "✅ 真核相似性判斷正確！抗黴菌較難完全安全。",
+    "wrongFeedback": "❌ 真菌不是細菌，沒有典型 peptidoglycan cell wall。",
+    "concept": "Antifungal difficulty"
+  },
+  {
+    "id": "12-19",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "抗病毒藥通常比抗細菌藥更難設計，主要因為？",
+    "options": [
+      "病毒常利用宿主細胞機器複製，容易傷到宿主",
+      "病毒都有 peptidoglycan wall",
+      "病毒都有 70S ribosome",
+      "病毒只能被 penicillin 殺死"
+    ],
+    "answer": 0,
+    "explanation": "病毒寄生在宿主細胞內，許多步驟依賴宿主系統，所以要攻擊病毒又不傷宿主較困難。",
+    "correctFeedback": "✅ 病毒隱身術被你破解！它借宿主機器，所以難打。",
+    "wrongFeedback": "❌ 病毒沒有 peptidoglycan，也沒有自己的 ribosome。",
+    "concept": "Antiviral difficulty"
+  },
+  {
+    "id": "12-20",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Boss",
+    "prompt": "下列哪個是抗藥性機制與例子的正確配對？",
+    "options": [
+      "Drug inactivation：β-lactamase 破壞 β-lactam",
+      "Drug pump：DNA polymerase proofreading",
+      "Change binding site：0.22 μm filtration",
+      "Alternate pathway：RNA splicing"
+    ],
+    "answer": 0,
+    "explanation": "β-lactamase 是 drug inactivation 的例子。其他抗藥機制包含 decreased permeability、drug pump、change binding site、alternate metabolic pathway。",
+    "correctFeedback": "🔥 抗藥機制拆解成功！β-lactamase = drug inactivation。",
+    "wrongFeedback": "❌ Proofreading、filtration、splicing 不是這裡的抗藥機制例子。",
+    "concept": "Resistance mechanisms"
+  },
+  {
+    "id": "12-21",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "抗生素壓力下抗藥菌比例上升，最正確的理解是？",
+    "options": [
+      "抗生素讓每隻細菌努力後主動變強",
+      "抗生素殺掉敏感菌，原本少數抗藥菌留下來繁殖，形成 selection",
+      "抗生素會直接製造 plasmid",
+      "所有抗藥性都只來自人體細胞"
+    ],
+    "answer": 1,
+    "explanation": "抗生素不是讓細菌有意識變強，而是篩選原本就能活下來的 resistant mutants 或取得抗藥基因的細菌。",
+    "correctFeedback": "✅ Selection 概念正確！不是努力變強，是被篩出來。",
+    "wrongFeedback": "❌ 抗生素壓力像篩子：敏感菌死，抗藥菌留下。",
+    "concept": "Selection for resistance"
+  },
+  {
+    "id": "12-22",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "病人覺得好一點就太早停抗生素，為什麼可能增加抗藥性問題？",
+    "options": [
+      "可能留下較耐受的菌繼續繁殖",
+      "代表所有菌都已完全死亡",
+      "會讓人體長出 peptidoglycan",
+      "會把病毒變成細菌"
+    ],
+    "answer": 0,
+    "explanation": "太早停藥可能讓尚未被清除、較耐受的菌留下並繁殖，使族群更偏抗藥。",
+    "correctFeedback": "✅ 抗藥風險判斷正確！沒殺乾淨最危險。",
+    "wrongFeedback": "❌ 症狀改善不一定代表病原全部清除。",
+    "concept": "Antibiotic misuse"
+  },
+  {
+    "id": "12-23",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Normal",
+    "prompt": "MIC 的正確定義是？",
+    "options": [
+      "Minimum Inhibitory Concentration，能明顯抑制細菌生長的最低藥物濃度",
+      "Maximum Infection Count，最大感染數",
+      "Membrane Integrity Coefficient，膜完整係數",
+      "Mutation Insertion Codon，突變插入密碼子"
+    ],
+    "answer": 0,
+    "explanation": "MIC 是最低抑制濃度，MIC 越小通常代表較少藥物即可抑制該菌。",
+    "correctFeedback": "✅ 藥敏指標掌握！MIC 小通常較敏感。",
+    "wrongFeedback": "❌ MIC 不是感染數，也不是膜係數，是最低抑制濃度。",
+    "concept": "MIC"
+  },
+  {
+    "id": "12-24",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Boss",
+    "prompt": "藥物 A：toxic dose = 80 μg/mL，MIC = 2 μg/mL。藥物 B：toxic dose = 20 μg/mL，MIC = 10 μg/mL。哪個判斷最合理？",
+    "options": [
+      "A 的 TI = 40，安全範圍比 B 大",
+      "A 的 TI = 0.025，安全範圍比 B 小",
+      "B 的 TI = 200，最安全",
+      "MIC 越大代表越有效"
+    ],
+    "answer": 0,
+    "explanation": "Therapeutic Index, TI = toxic dose / MIC。A = 80/2 = 40；B = 20/10 = 2。TI 越大，安全範圍越大。",
+    "correctFeedback": "🔥 TI 計算爆擊！有效濃度與毒性濃度距離越大越安全。",
+    "wrongFeedback": "❌ 公式記住：TI = toxic dose / MIC；MIC 小通常代表較有效。",
+    "concept": "Therapeutic Index"
+  },
+  {
+    "id": "12-25",
+    "chapter": "第12章｜Antimicrobial Drugs",
+    "difficulty": "Hard",
+    "prompt": "Kirby-Bauer disc diffusion 中，抑制圈 zone of inhibition 較大通常代表？",
+    "options": [
+      "該菌對藥物較敏感",
+      "該菌一定完全不怕藥",
+      "藥物完全不能擴散",
+      "細菌正在進行 splicing"
+    ],
+    "answer": 0,
+    "explanation": "抑制圈較大代表藥物擴散後能抑制較大範圍的細菌生長，通常表示該菌較敏感。",
+    "correctFeedback": "✅ 抑制圈判讀成功！圈越大，通常越怕藥。",
+    "wrongFeedback": "❌ 抑制圈大不是抗藥，而是受到藥物抑制的區域較大。",
+    "concept": "Kirby-Bauer"
+  },
+  {
+    "id": "B-01",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "一株細菌透過 sex pilus 從另一株細菌得到 R plasmid，開始產生 β-lactamase，使 penicillin 失效。下列哪個組合最正確？",
+    "options": [
+      "Transformation；β-lactamase 改變 ribosome；penicillin 打 30S",
+      "Conjugation；β-lactamase 破壞 β-lactam ring；penicillin 打 peptidoglycan cross-link",
+      "Transduction；β-lactamase 製造 folic acid；penicillin 打 DNA gyrase",
+      "Translation；β-lactamase 阻止 primer annealing；penicillin 打 viral capsid"
+    ],
+    "answer": 1,
+    "explanation": "sex pilus 是 conjugation 線索；R plasmid 可帶抗藥基因；β-lactamase 破壞 β-lactam ring；penicillin 阻止 peptidoglycan cross-link。",
+    "correctFeedback": "🔥 Super Resistant Microbe 破防！你把 gene transfer、抗藥性、藥物機制串起來了。",
+    "wrongFeedback": "💀 Boss 回血！這題是整合題：sex pilus = conjugation；β-lactamase = 藥物失活；penicillin = cell wall。",
+    "concept": "R plasmid + β-lactamase"
+  },
+  {
+    "id": "B-02",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "你想複製一段真核 gene 並在 E. coli 中表現 protein。下列策略最合理？",
+    "options": [
+      "直接用含 intron 的 genomic DNA，因為 E. coli 會自動 splicing",
+      "先由 mRNA 做 cDNA，再接進 vector，轉形到 E. coli 並篩選 clone",
+      "用 HEPA filter 把 gene 吹進細菌",
+      "用 β-lactamase 把 mRNA 接到 ribosome"
+    ],
+    "answer": 1,
+    "explanation": "E. coli 通常無法處理真核 intron，所以常用 cDNA。流程包含 reverse transcription、vector construction、transformation、selection/screening。",
+    "correctFeedback": "🔥 蛋白表現路線成功！你沒有忘記 cDNA 的重要性。",
+    "wrongFeedback": "💀 Boss 反擊！細菌不會幫真核 gene 做 splicing，直接用 genomic DNA 可能失敗。",
+    "concept": "cDNA expression in bacteria"
+  },
+  {
+    "id": "B-03",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某實驗樣品 PCR 出現 band，但 negative control 也有 band。下列判斷最合理？",
+    "options": [
+      "目標一定存在且結果完美",
+      "可能有 contamination，因 PCR 很敏感，需要重新檢查",
+      "代表 Taq polymerase 不能耐熱",
+      "代表 Southern blot 看的是 RNA"
+    ],
+    "answer": 1,
+    "explanation": "Negative control 不應有 band。若有 band，常見原因是污染造成 false positive，需重新配製或檢查污染來源。",
+    "correctFeedback": "🔥 污染偵測成功！你知道 control 是救命線。",
+    "wrongFeedback": "💀 Boss 反擊！NTC/negative control 有 band 不能硬說實驗成功。",
+    "concept": "PCR contamination / controls"
+  },
+  {
+    "id": "B-04",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某蛋白溶液需要去除一般細菌污染，但不能加熱，處理後還要做蛋白實驗。最佳方法與理由是？",
+    "options": [
+      "Autoclave；一定保留蛋白活性",
+      "0.22 μm filtration；移除細菌且較不破壞熱敏感蛋白",
+      "Bleach；可直接加入樣品提升 protein folding",
+      "Dry heat；最適合所有液體蛋白"
+    ],
+    "answer": 1,
+    "explanation": "熱敏感蛋白不適合高溫或強化學消毒劑。0.22 μm filtration 可移除多數細菌，但不是殺死。",
+    "correctFeedback": "🔥 樣品存活！你同時考慮 microbial control 和蛋白穩定性。",
+    "wrongFeedback": "💀 Boss 反擊！高溫/漂白水會讓蛋白實驗直接報廢。",
+    "concept": "Filtration / heat-sensitive sample"
+  },
+  {
+    "id": "B-05",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "若某菌因 ribosome binding site 改變而對 tetracycline 效果下降，這最接近哪種抗藥機制？",
+    "options": [
+      "Change in drug binding site",
+      "Drug inactivation by β-lactamase",
+      "Sanitization",
+      "Back mutation 一定恢復原序列"
+    ],
+    "answer": 0,
+    "explanation": "抗藥性可來自藥物結合位點改變，使藥物不易作用。這不同於 β-lactamase 直接破壞藥物。",
+    "correctFeedback": "🔥 靶點突變識破！藥物打不到就是 binding site change。",
+    "wrongFeedback": "💀 Boss 反擊！不是所有抗藥性都是 β-lactamase。",
+    "concept": "Target modification"
+  },
+  {
+    "id": "B-06",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "你要確認一段未知 DNA 的 A/T/G/C 順序，並不是只看大小或表現量。最適合的方法是？",
+    "options": [
+      "Gel electrophoresis",
+      "Sanger sequencing",
+      "Microarray",
+      "Kirby-Bauer"
+    ],
+    "answer": 1,
+    "explanation": "Gel 看大小，microarray 看 gene expression，Kirby-Bauer 看藥敏；要讀出 A/T/G/C 順序用 sequencing。",
+    "correctFeedback": "🔥 工具選擇完美！讀字母順序 = sequencing。",
+    "wrongFeedback": "💀 Boss 反擊！不要把 gel、microarray、sequencing 混成同一件事。",
+    "concept": "Technique selection"
+  },
+  {
+    "id": "B-07",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "一個 mutation 把某 codon 變成 stop codon，導致 protein 提早結束。這最符合？",
+    "options": [
+      "Silent mutation",
+      "Nonsense mutation",
+      "Degermation",
+      "Transformation"
+    ],
+    "answer": 1,
+    "explanation": "Nonsense mutation 產生 premature stop codon，常導致 protein truncation。",
+    "correctFeedback": "🔥 早停突變命中！stop codon = nonsense。",
+    "wrongFeedback": "💀 Boss 反擊！silent 不改胺基酸；nonsense 是變成 stop。",
+    "concept": "Nonsense mutation"
+  },
+  {
+    "id": "B-08",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某消毒流程能殺 vegetative cells 和多數病毒，但無法保證殺 endospore。最精準的說法是？",
+    "options": [
+      "它已經達到 sterilization",
+      "它可能是 disinfection，但不是 sterilization",
+      "它等於 sequencing",
+      "它是 transformation"
+    ],
+    "answer": 1,
+    "explanation": "Sterilization 要殺所有微生物包含 endospore；若不能保證殺 endospore，不能稱為完整 sterilization。",
+    "correctFeedback": "🔥 無菌標準守住！endospore 是關鍵門檻。",
+    "wrongFeedback": "💀 Boss 反擊！殺很多不等於殺全部。Sterilization 要包含 endospore。",
+    "concept": "Disinfection vs sterilization"
+  },
+  {
+    "id": "B-09",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某病人病毒感染卻要求抗生素，下列最合理的回應是？",
+    "options": [
+      "抗生素通常針對細菌結構或代謝，對病毒無效，濫用會增加抗藥壓力",
+      "抗生素能治所有病毒且無副作用",
+      "病毒有 peptidoglycan，所以 penicillin 最有效",
+      "只要加 clavulanate 就能殺病毒"
+    ],
+    "answer": 0,
+    "explanation": "抗生素多針對細菌 cell wall、ribosome、folate 等特徵。病毒缺乏這些靶點，濫用抗生素會增加抗藥菌篩選壓力。",
+    "correctFeedback": "🔥 合理用藥成功！你擋下抗生素濫用。",
+    "wrongFeedback": "💀 Boss 反擊！病毒沒有細菌 cell wall，也沒有 70S ribosome。",
+    "concept": "Antibiotic misuse / virus"
+  },
+  {
+    "id": "B-10",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某細菌在含 lactose 但 glucose 也高的環境中，lac operon 不會達到最高表現。主因是？",
+    "options": [
+      "雖然 repressor 可離開，但 glucose 高使 cAMP 低，CAP 幫助不足",
+      "lactose 會讓 repressor 更緊綁 operator",
+      "glucose 高會讓 DNA polymerase 停止所有 replication",
+      "CAP-cAMP 只存在於真核 mitochondria"
+    ],
+    "answer": 0,
+    "explanation": "有 lactose 可解除 repressor，但 glucose 高時 cAMP 低，CAP-cAMP 不足，RNA polymerase 招募較弱，因此表現不是最高。",
+    "correctFeedback": "🔥 Operon 雙條件判斷成功！lactose + low glucose 才最強。",
+    "wrongFeedback": "💀 Boss 反擊！只看 lactose 會漏掉 catabolite repression。",
+    "concept": "Lac operon integration"
+  },
+  {
+    "id": "B-11",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "你看到一個 DNA band 比預期小很多，且 sequencing 顯示 insert 中間少了一個 base。若發生在 ORF 前段，最擔心的是？",
+    "options": [
+      "Frameshift 造成後續 codons 改變與 premature stop",
+      "Silent mutation 一定完全無影響",
+      "Southern blot 變成 Northern blot",
+      "細菌自動產生 endospore"
+    ],
+    "answer": 0,
+    "explanation": "單一 base deletion 在 ORF 前段可能造成 frameshift，後續胺基酸序列大幅改變，甚至提前 stop。",
+    "correctFeedback": "🔥 DNA 偵錯成功！小 deletion 可能造成大災難。",
+    "wrongFeedback": "💀 Boss 反擊！少一個 base 不是小事，可能讓整個 reading frame 亂掉。",
+    "concept": "Frameshift / sequencing"
+  },
+  {
+    "id": "B-12",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "若想比較癌細胞與正常細胞中上千個 gene 的 expression 差異，最適合？",
+    "options": [
+      "Microarray",
+      "Autoclave",
+      "Kirby-Bauer",
+      "Degermation"
+    ],
+    "answer": 0,
+    "explanation": "Microarray 可一次檢測大量基因表現，適合比較 normal vs cancer cell 的 expression profile。",
+    "correctFeedback": "🔥 表現量地圖開啟！多基因 expression = microarray。",
+    "wrongFeedback": "💀 Boss 反擊！Autoclave 是滅菌，Kirby-Bauer 是藥敏，degermation 是皮膚除菌。",
+    "concept": "Microarray"
+  },
+  {
+    "id": "B-13",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某藥 MIC 很低但 toxic dose 也很低。下列哪個判斷最合理？",
+    "options": [
+      "只看 MIC 低就一定最安全",
+      "還要看 TI；若 toxic dose 接近 MIC，安全範圍小",
+      "MIC 和毒性完全無關，所以不用管",
+      "TI 越小越安全"
+    ],
+    "answer": 1,
+    "explanation": "MIC 代表有效抑制濃度，toxic dose 代表毒性濃度。要看 TI = toxic dose / MIC，TI 大才代表安全範圍較大。",
+    "correctFeedback": "🔥 用藥安全判斷成功！有效不等於安全。",
+    "wrongFeedback": "💀 Boss 反擊！MIC 低只是藥效強，還要看 toxic dose 距離多遠。",
+    "concept": "MIC / TI integration"
+  },
+  {
+    "id": "B-14",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "一株細菌從環境吸收裸 DNA 後獲得 capsule gene，毒力上升。此現象最符合？",
+    "options": [
+      "Transformation",
+      "Conjugation",
+      "Transduction",
+      "Translation termination"
+    ],
+    "answer": 0,
+    "explanation": "從環境吸收 naked DNA 是 transformation。若整合 capsule gene，phenotype/virulence 可能改變。",
+    "correctFeedback": "🔥 裸 DNA 吸收成功判讀！Transformation 命中。",
+    "wrongFeedback": "💀 Boss 反擊！接觸 pilus 才是 conjugation；phage 帶才是 transduction。",
+    "concept": "Transformation / virulence"
+  },
+  {
+    "id": "B-15",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "若某 phage 離開細菌 chromosome 時帶走插入位置附近的 bacterial genes，這最符合？",
+    "options": [
+      "Generalized transduction",
+      "Specialized transduction",
+      "Transformation",
+      "Lac induction"
+    ],
+    "answer": 1,
+    "explanation": "Specialized transduction 是溫和型 phage 從 chromosome excise 時，可能帶走鄰近特定 bacterial genes。",
+    "correctFeedback": "🔥 病毒快遞精準分類！鄰近特定基因 = specialized。",
+    "wrongFeedback": "💀 Boss 反擊！Generalized 通常是包裝錯誤，可帶 random DNA。",
+    "concept": "Specialized transduction"
+  },
+  {
+    "id": "B-16",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "若要殺死內生孢子，選項中哪個描述最符合標準？",
+    "options": [
+      "只要 sanitization 就足夠",
+      "需要 sterilization 或明確 sporicidal 方法",
+      "只要 broad-spectrum antibiotic 就能保證",
+      "用 RT-PCR 可直接殺孢子"
+    ],
+    "answer": 1,
+    "explanation": "Endospore 高度耐受，普通消毒或衛生處理不一定能殺；需要 sterilization 或 sporicidal 等級方法。",
+    "correctFeedback": "🔥 內生孢子防線突破！你知道它是最難殺的目標。",
+    "wrongFeedback": "💀 Boss 反擊！抗生素治療和實驗物品滅菌不是同一概念。",
+    "concept": "Endospore"
+  },
+  {
+    "id": "B-17",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "PCR、probe hybridization、Southern blot 都和哪個基礎最相關？",
+    "options": [
+      "核酸互補配對",
+      "Peptidoglycan cross-link",
+      "70S ribosome translocation",
+      "Drug pump"
+    ],
+    "answer": 0,
+    "explanation": "這些技術都依賴特定核酸序列的互補配對；PCR 用 primer，probe/blot 用標記 probe 找目標。",
+    "correctFeedback": "🔥 核酸共通原理掌握！互補配對是一堆技術的底層邏輯。",
+    "wrongFeedback": "💀 Boss 反擊！不要只背技術名，先看底層原理：base pairing。",
+    "concept": "Hybridization principle"
+  },
+  {
+    "id": "B-18",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "某抗生素抑制 RNA polymerase。若問它會連帶讓 protein 下降的原因，最合理是？",
+    "options": [
+      "mRNA 做不出來，translation 沒有足夠模板",
+      "protein 會先變成 DNA",
+      "ribosome 會自動複製 chromosome",
+      "cell wall 會產生 intron"
+    ],
+    "answer": 0,
+    "explanation": "RNA polymerase 被抑制會阻止 transcription，mRNA 量下降，後續 translation 缺少模板，因此 protein 下降。",
+    "correctFeedback": "🔥 中心法則連鎖反應成功！DNA→RNA 卡住，後面 protein 也受影響。",
+    "wrongFeedback": "💀 Boss 反擊！要用 central dogma 串起來，不是背單一藥名。",
+    "concept": "Central dogma + antibiotics"
+  },
+  {
+    "id": "B-19",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "若某 colony PCR 出現正確大小 band，但你仍想確認 insert 沒有 point mutation，下一步較適合？",
+    "options": [
+      "Sequencing",
+      "Sanitization",
+      "Kirby-Bauer",
+      "HEPA filtration"
+    ],
+    "answer": 0,
+    "explanation": "PCR/gel 可確認大小接近，但不能保證序列每個 base 正確。若要確認 point mutation，需 sequencing。",
+    "correctFeedback": "🔥 Clone 驗證升級！大小正確不代表序列完全正確。",
+    "wrongFeedback": "💀 Boss 反擊！Gel 只能看大小，不能讀出每一個 base。",
+    "concept": "Clone validation"
+  },
+  {
+    "id": "B-20",
+    "chapter": "終章｜Integrated Boss",
+    "difficulty": "Boss",
+    "prompt": "如果要把第 9–12 章串成一句話，哪個最完整？",
+    "options": [
+      "DNA 資訊可被複製、表現、突變與交換；基因工程能操作 DNA；微生物控制能降低/殺死微生物；抗微生物藥物利用選擇性毒性攻擊弱點",
+      "所有章節都只是在背藥名",
+      "基因工程和抗生素完全無關，plasmid 也不會傳抗藥性",
+      "滅菌就是讓 bacteria 做 translation"
+    ],
+    "answer": 0,
+    "explanation": "四章主線可串成：遺傳資訊如何運作與改變；如何用技術操作 DNA；如何控制微生物；如何用藥物攻擊微生物並面對抗藥性。",
+    "correctFeedback": "🏆 終章 Boss 擊破！你已經把四章串成一張地圖。",
+    "wrongFeedback": "💀 Boss 反擊！這四章不是零碎名詞，是 DNA、技術、控制、用藥與抗藥性的連續故事。",
+    "concept": "Chapter integration"
+  }
+];
+
+const state = {
+  mode: null,
+  modeLabel: '',
+  pool: [],
+  index: 0,
+  hp: 100,
+  maxHp: 100,
+  xp: 0,
+  combo: 0,
+  maxCombo: 0,
+  correct: 0,
+  answered: 0,
+  bossMax: 0,
+  bossHp: 0,
+  hints: 3,
+  currentAnswered: false,
+  wrongs: [],
+  chapterStats: {},
+  lastStarter: null
+};
+
+const chapterShort = {
+  '第9章｜Genetics & Microbial Genetics': '第9章 DNA情報',
+  '第10章｜Genetic Engineering': '第10章 基因工程',
+  '第11章｜Microbial Control': '第11章 滅菌防線',
+  '第12章｜Antimicrobial Drugs': '第12章 抗微生物藥物',
+  '終章｜Integrated Boss': '終章 Boss整合'
+};
+
+const diffStyle = { 'Normal': '', 'Hard': 'hard', 'Boss': 'boss' };
+
+document.getElementById('bankInfo').textContent = `已載入 ${QUESTIONS.length} 題硬核題庫｜第9–12章 + 終章整合`;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function sample(arr, n) {
+  return shuffle(arr).slice(0, Math.min(n, arr.length));
+}
+
+function setScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function initGame(pool, label, mode, starter) {
+  state.mode = mode;
+  state.modeLabel = label;
+  state.pool = pool;
+  state.index = 0;
+  state.hp = 100;
+  state.xp = 0;
+  state.combo = 0;
+  state.maxCombo = 0;
+  state.correct = 0;
+  state.answered = 0;
+  state.hints = 3;
+  state.currentAnswered = false;
+  state.wrongs = [];
+  state.chapterStats = {};
+  state.bossMax = Math.max(100, pool.length * 24);
+  state.bossHp = state.bossMax;
+  state.lastStarter = starter;
+  setScreen('game');
+  renderQuestion();
+}
+
+function startMode(mode) {
+  let pool = [];
+  let label = '';
+  if (mode === 'bossrush') {
+    const hard = QUESTIONS.filter(q => q.difficulty === 'Hard');
+    const boss = QUESTIONS.filter(q => q.difficulty === 'Boss');
+    pool = shuffle([...sample(hard, 26), ...sample(boss, 14)]).slice(0, 40);
+    label = 'Boss Rush';
+  } else if (mode === 'hell') {
+    const boss = QUESTIONS.filter(q => q.difficulty === 'Boss');
+    const hard = QUESTIONS.filter(q => q.difficulty === 'Hard');
+    const normal = QUESTIONS.filter(q => q.difficulty === 'Normal');
+    pool = shuffle([...sample(boss, 28), ...sample(hard, 27), ...sample(normal, 5)]).slice(0, 60);
+    label = 'Final Exam Hell';
+  } else {
+    pool = shuffle(QUESTIONS);
+    label = '全題庫練習';
+  }
+  initGame(pool, label, mode, () => startMode(mode));
+}
+
+function startChapter(chapter) {
+  const pool = shuffle(QUESTIONS.filter(q => q.chapter === chapter));
+  initGame(pool, chapterShort[chapter] || chapter, 'chapter', () => startChapter(chapter));
+}
+
+function startWrongReview() {
+  const ids = JSON.parse(localStorage.getItem('microbeBossWrongIds') || '[]');
+  const unique = [...new Set(ids)];
+  const pool = unique.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean);
+  if (!pool.length) {
+    alert('目前沒有錯題紀錄。先打一場 Boss Rush 或章節練習吧！');
+    return;
+  }
+  initGame(shuffle(pool), '錯題回顧', 'wrongReview', () => startWrongReview());
+}
+
+function renderQuestion() {
+  if (state.index >= state.pool.length || (state.mode === 'hell' && state.hp <= 0)) {
+    return endGame();
+  }
+  const q = state.pool[state.index];
+  state.currentAnswered = false;
+  document.getElementById('modeName').textContent = state.modeLabel;
+  document.getElementById('progressText').textContent = `${state.index + 1}/${state.pool.length}`;
+  document.getElementById('xpText').textContent = state.xp;
+  document.getElementById('comboText').textContent = state.combo;
+  document.getElementById('accText').textContent = state.answered ? `${Math.round(state.correct / state.answered * 100)}%` : '0%';
+  document.getElementById('chapterBadge').textContent = chapterShort[q.chapter] || q.chapter;
+  const dBadge = document.getElementById('difficultyBadge');
+  dBadge.textContent = q.difficulty;
+  dBadge.className = 'badge ' + (diffStyle[q.difficulty] || '');
+  document.getElementById('conceptBadge').textContent = q.concept;
+  document.getElementById('questionText').textContent = q.prompt;
+
+  const options = document.getElementById('options');
+  options.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${escapeHTML(opt)}</span>`;
+    btn.onclick = () => answer(i);
+    options.appendChild(btn);
+  });
+
+  document.getElementById('feedbackBox').classList.remove('show');
+  document.getElementById('hintBox').classList.remove('show');
+  document.getElementById('hintBox').textContent = '';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('hintBtn').disabled = state.hints <= 0;
+  document.getElementById('hintCount').textContent = state.hints;
+  updateBars();
+}
+
+function answer(choice) {
+  if (state.currentAnswered) return;
+  state.currentAnswered = true;
+  const q = state.pool[state.index];
+  const isCorrect = choice === q.answer;
+  state.answered++;
+  if (!state.chapterStats[q.chapter]) {
+    state.chapterStats[q.chapter] = { correct: 0, total: 0 };
+  }
+  state.chapterStats[q.chapter].total++;
+
+  const options = [...document.querySelectorAll('.option')];
+  options.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.answer) btn.classList.add('correct');
+    if (i === choice && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const difficultyDamage = q.difficulty === 'Boss' ? 34 : q.difficulty === 'Hard' ? 24 : 18;
+  const wrongDamage = q.difficulty === 'Boss' ? 18 : q.difficulty === 'Hard' ? 12 : 8;
+
+  const card = document.getElementById('questionCard');
+  if (isCorrect) {
+    state.correct++;
+    state.chapterStats[q.chapter].correct++;
+    state.combo++;
+    state.maxCombo = Math.max(state.maxCombo, state.combo);
+    const comboBonus = state.combo > 0 && state.combo % 3 === 0 ? 14 : 0;
+    const xpGain = (q.difficulty === 'Boss' ? 18 : q.difficulty === 'Hard' ? 13 : 9) + comboBonus;
+    state.xp += xpGain;
+    state.bossHp = Math.max(0, state.bossHp - difficultyDamage - comboBonus);
+    card.classList.remove('shake');
+    card.classList.add('flash');
+    setTimeout(() => card.classList.remove('flash'), 360);
+    showFeedback(true, q, comboBonus);
+  } else {
+    state.combo = 0;
+    state.hp = Math.max(0, state.hp - wrongDamage);
+    state.bossHp = Math.min(state.bossMax, state.bossHp + 8);
+    state.wrongs.push({ q, choice });
+    saveWrong(q.id);
+    card.classList.remove('flash');
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 360);
+    showFeedback(false, q, 0);
+  }
+  document.getElementById('nextBtn').style.display = 'inline-flex';
+  document.getElementById('hintBtn').disabled = true;
+  updateBars();
+
+  if (state.mode === 'hell' && state.hp <= 0) {
+    document.getElementById('nextBtn').textContent = 'HP 歸零，查看結算 →';
+  } else if (state.index === state.pool.length - 1) {
+    document.getElementById('nextBtn').textContent = '查看結算 →';
+  } else {
+    document.getElementById('nextBtn').textContent = '下一題 →';
+  }
+}
+
+function showFeedback(correct, q, comboBonus) {
+  const box = document.getElementById('feedbackBox');
+  const title = document.getElementById('feedbackTitle');
+  const flavor = document.getElementById('feedbackFlavor');
+  const explanation = document.getElementById('feedbackExplanation');
+  if (correct) {
+    title.textContent = comboBonus ? '✅ 答對 + Combo 暴擊！' : '✅ 答對！';
+    flavor.textContent = q.correctFeedback + (comboBonus ? ` 連對 3 題，額外 +${comboBonus} 爆擊傷害！` : '');
+  } else {
+    title.textContent = '❌ 答錯，Boss 反擊！';
+    flavor.textContent = q.wrongFeedback;
+  }
+  explanation.textContent = '講解：' + q.explanation;
+  box.classList.add('show');
+}
+
+function nextQuestion() {
+  state.index++;
+  renderQuestion();
+}
+
+function showHint() {
+  if (state.currentAnswered || state.hints <= 0) return;
+  const q = state.pool[state.index];
+  state.hints--;
+  state.xp = Math.max(0, state.xp - 2);
+  document.getElementById('hintCount').textContent = state.hints;
+  document.getElementById('hintBtn').disabled = state.hints <= 0;
+  const hintBox = document.getElementById('hintBox');
+  hintBox.textContent = `提示：這題在考「${q.concept}」。先不要背答案，先想：這個概念是在 DNA 資訊、實驗工具、微生物控制，還是用藥抗藥？`;
+  hintBox.classList.add('show');
+  document.getElementById('xpText').textContent = state.xp;
+}
+
+function updateBars() {
+  const hpPct = Math.max(0, state.hp / state.maxHp * 100);
+  const bossPct = Math.max(0, state.bossHp / state.bossMax * 100);
+  document.getElementById('hpFill').style.width = `${hpPct}%`;
+  document.getElementById('bossFill').style.width = `${bossPct}%`;
+  document.getElementById('hpLabel').textContent = `${state.hp}/${state.maxHp}`;
+  document.getElementById('bossLabel').textContent = `${Math.round(bossPct)}%`;
+  document.getElementById('xpText').textContent = state.xp;
+  document.getElementById('comboText').textContent = state.combo;
+  document.getElementById('accText').textContent = state.answered ? `${Math.round(state.correct / state.answered * 100)}%` : '0%';
+  document.getElementById('progressText').textContent = `${Math.min(state.index + 1, state.pool.length)}/${state.pool.length}`;
+}
+
+function endGame() {
+  const acc = state.answered ? state.correct / state.answered : 0;
+  const rank = getRank(acc, state.hp, state.xp);
+  document.getElementById('rankText').textContent = rank;
+  document.getElementById('finalXp').textContent = state.xp;
+  document.getElementById('finalAcc').textContent = `${Math.round(acc * 100)}%（${state.correct}/${state.answered}）`;
+  document.getElementById('finalHp').textContent = `${state.hp}/100`;
+  document.getElementById('finalMaxCombo').textContent = state.maxCombo;
+
+  const weak = getWeakChapter();
+  document.getElementById('weakChapter').textContent = weak || '沒有明顯弱點';
+
+  const advice = document.getElementById('resultAdvice');
+  advice.innerHTML = buildAdvice(rank, weak, acc);
+
+  const list = document.getElementById('wrongList');
+  list.innerHTML = '';
+  if (!state.wrongs.length) {
+    list.innerHTML = `<div class="review-item">🎉 沒有錯題。這場你很穩，可以直接挑戰 Final Exam Hell。</div>`;
+  } else {
+    state.wrongs.forEach(({q, choice}, idx) => {
+      const div = document.createElement('div');
+      const letters = ['A','B','C','D'];
+      div.className = 'review-item';
+      div.innerHTML = `
+        <b>${idx + 1}. ${escapeHTML(chapterShort[q.chapter] || q.chapter)}｜${escapeHTML(q.concept)}</b><br>
+        題目：${escapeHTML(q.prompt)}<br>
+        你選：${letters[choice] || '?'}. ${escapeHTML(q.options[choice] || '未作答')}<br>
+        正解：${letters[q.answer]}. ${escapeHTML(q.options[q.answer])}<br>
+        講解：${escapeHTML(q.explanation)}
+      `;
+      list.appendChild(div);
+    });
+  }
+  saveBest(acc, rank);
+  setScreen('result');
+}
+
+function getRank(acc, hp, xp) {
+  if (acc >= .9 && hp >= 70) return 'S';
+  if (acc >= .8) return 'A';
+  if (acc >= .65) return 'B';
+  if (acc >= .5) return 'C';
+  return 'D';
+}
+
+function getWeakChapter() {
+  let worst = null;
+  Object.entries(state.chapterStats).forEach(([chapter, st]) => {
+    if (st.total < 2) return;
+    const rate = st.correct / st.total;
+    if (!worst || rate < worst.rate) worst = { chapter, rate, st };
+  });
+  return worst ? `${chapterShort[worst.chapter] || worst.chapter}（${worst.st.correct}/${worst.st.total}）` : '';
+}
+
+function buildAdvice(rank, weak, acc) {
+  let text = '';
+  if (rank === 'S') text = '你已經能把四章串起來。下一步可以練「自己解釋題目」：看到每題都能講出為什麼其他選項錯。';
+  else if (rank === 'A') text = '觀念很穩，但還有少數陷阱題會掉。建議直接練錯題回顧，把錯題解析唸出來。';
+  else if (rank === 'B') text = '你有基礎，但跨章整合還不夠穩。建議先補最弱章節，再打 Boss Rush。';
+  else if (rank === 'C') text = '目前可能是名詞有印象，但因果鏈還沒串好。建議用章節單挑先重建主線。';
+  else text = '先不要硬刷整合題。從第 9 章 DNA 主線、第 10 章工具功能、第 11 章控制強度、第 12 章藥物靶點分開練。';
+  return `<b>建議：</b>${text}${weak ? `<br><b>優先補強：</b><span class="weak">${escapeHTML(weak)}</span>` : ''}`;
+}
+
+function saveWrong(id) {
+  const key = 'microbeBossWrongIds';
+  const ids = JSON.parse(localStorage.getItem(key) || '[]');
+  ids.push(id);
+  localStorage.setItem(key, JSON.stringify(ids.slice(-300)));
+}
+
+function saveBest(acc, rank) {
+  const key = 'microbeBossBest';
+  const old = JSON.parse(localStorage.getItem(key) || 'null');
+  const rec = { acc, rank, xp: state.xp, date: new Date().toISOString(), mode: state.modeLabel };
+  if (!old || acc > old.acc || (acc === old.acc && state.xp > old.xp)) {
+    localStorage.setItem(key, JSON.stringify(rec));
+  }
+}
+
+function restartSame() {
+  if (state.lastStarter) state.lastStarter();
+  else goHome();
+}
+
+function goHome() {
+  setScreen('home');
+}
+
+function confirmQuit() {
+  if (confirm('確定要離開這局嗎？目前進度不會保留，但錯題已記錄。')) goHome();
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+</script>
+</body>
+</html>
